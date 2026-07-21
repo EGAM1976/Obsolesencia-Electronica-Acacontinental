@@ -257,357 +257,542 @@ function renderDetail(e){
 }
 
 
-// ══════════════════════════════════════════════════════
-//  PLAN DE TRABAJO
-// ══════════════════════════════════════════════════════
-const WP_STEPS={
-  'wf1':['w1-1','w1-2','w1-3'],
-  'wf2':['w2-1','w2-2','w2-3'],
-  'wf3':['w3-1','w3-2','w3-3'],
-  'wf4':['w4-1','w4-2','w4-3','w4-4','w4-5']
-};
-let wpState={};
-try{wpState=JSON.parse(localStorage.getItem('acl-wp-v1')||'{}');}catch{}
-function wpSave(){try{localStorage.setItem('acl-wp-v1',JSON.stringify(wpState));}catch{}}
 
-function wpToggleStep(id){
-  const el=document.getElementById('wps-'+id);
-  if(!el)return;
-  const done=el.classList.contains('done');
-  el.classList.toggle('done',!done);
-  wpState['wps-'+id]=!done;
-  wpSave();wpUpdateProg();
-}
-function wpToggleSub(id){
-  const el=document.getElementById('wpss-'+id);
-  if(!el)return;
-  const done=el.classList.contains('done');
-  el.classList.toggle('done',!done);
-  wpState['wpss-'+id]=!done;
-  wpSave();
-}
-function wpTogglePhase(id){
-  const body=document.getElementById('wpb-'+id);
-  const chev=document.getElementById('wpc-'+id);
-  if(!body||!chev)return;
-  const open=body.classList.contains('open');
-  body.classList.toggle('open',!open);
-  chev.classList.toggle('open',!open);
-}
-function wpUpdateProg(){
-  let tot=0,dn=0;
-  Object.entries(WP_STEPS).forEach(([ph,steps])=>{
-    const d=steps.filter(s=>document.getElementById('wps-'+s)?.classList.contains('done')).length;
-    const t=steps.length;
-    const pct=t>0?Math.round(d/t*100):0;
-    const pmn=document.getElementById('wppm-'+ph);
-    const phb=document.getElementById('wppb-'+ph);
-    const phpct=document.getElementById('wppct-'+ph);
-    const fp=document.getElementById('wpfp-'+ph);
-    const fpp=document.getElementById('wpfpp-'+ph);
-    const bd=document.getElementById('wpbd-'+ph);
-    if(pmn)pmn.textContent=pct+'%';
-    if(phb)phb.textContent=d+' / '+t;
-    if(phpct)phpct.textContent=pct+'%';
-    if(fp)fp.style.width=pct+'%';
-    if(fpp)fpp.textContent=pct+'%';
-    if(bd)bd.textContent=d+' / '+t;
-    tot+=t;dn+=d;
-  });
-  const g=tot>0?Math.round(dn/tot*100):0;
-  const gpct=document.getElementById('wp-gpct');
-  const gbar=document.getElementById('wp-gbar');
-  if(gpct)gpct.textContent=g+'%';
-  if(gbar)gbar.style.width=g+'%';
-}
-function wpRestoreState(){
-  Object.entries(wpState).forEach(([k,v])=>{
-    if(!v)return;
-    const el=document.getElementById(k);
-    if(el){
-      if(k.startsWith('wps-'))el.classList.add('done');
-      else if(k.startsWith('wpss-'))el.classList.add('done');
-    }
-  });
-  wpUpdateProg();
-}
-
-function wpStep(id,title,desc,tags,resp,subs,info,warn,tool){
-  const step=h('div',{class:'wp-step',id:'wps-'+id});
-  const top=div('wp-step-top');
-  const chk=h('div',{class:'wp-chk',onclick:()=>wpToggleStep(id)},'✓');
-  const main=div('wp-step-main');
-  const titleEl=h('div',{class:'wp-step-title'});
-  titleEl.appendChild(document.createTextNode(title));
-  tags.forEach(([t,cls])=>{const sp=h('span',{class:'wp-tag wp-tag-'+cls});sp.textContent=t;titleEl.appendChild(sp);});
-  if(resp){const r=h('span',{class:'wp-resp'});r.textContent=resp;titleEl.appendChild(r);}
-  main.appendChild(titleEl);
-  if(desc){const d=h('p',{style:{fontSize:'12px',color:'var(--tx2)',lineHeight:'1.6',marginBottom:'6px'}});d.textContent=desc;main.appendChild(d);}
-  if(subs&&subs.length){
-    const sl=div('wp-substeps');
-    subs.forEach(([sid,stxt])=>{
-      const ss=h('div',{class:'wp-ss',id:'wpss-'+sid,onclick:()=>wpToggleSub(sid)});
-      const sc=h('div',{class:'wp-ss-chk'},'✓');
-      const st=h('span',null);st.innerHTML=stxt;
-      ss.appendChild(sc);ss.appendChild(st);sl.appendChild(ss);
-    });
-    main.appendChild(sl);
-  }
-  if(tool){const t=h('div',{class:'wp-tool'});t.textContent='🔧 '+tool;main.appendChild(t);}
-  if(info){const i=div('wp-info');i.innerHTML='<strong>✅ '+info.split(':')[0]+':</strong> '+info.split(':').slice(1).join(':');main.appendChild(i);}
-  if(warn){const w=div('wp-warn');w.innerHTML='<strong>⚠️ '+warn.split(':')[0]+':</strong> '+warn.split(':').slice(1).join(':');main.appendChild(w);}
-  top.appendChild(chk);top.appendChild(main);step.appendChild(top);
-  return step;
-}
-
-function wpPhase(id,num,bgCol,title,timing,steps_content,badgeStyle){
-  const ph=h('div',{class:'wp-phase',id:'wp'+id});
-  // Header
-  const hdr=h('div',{class:'wp-ph-hdr',onclick:()=>wpTogglePhase(id)});
-  const numEl=h('div',{class:'wp-ph-num',style:{background:bgCol}});numEl.textContent=num;
-  const info=div('wp-ph-info');
-  info.appendChild(h('div',{class:'wp-ph-title'},title));
-  const sub=div('wp-ph-sub');
-  const tm=h('span',{class:'wp-ph-timing'});tm.textContent='⏱ '+timing;sub.appendChild(tm);
-  info.appendChild(sub);
-  const bd=h('span',{class:'wp-ph-badge',style:badgeStyle,id:'wpbd-'+id},'0 / '+WP_STEPS['w'+id].length);
-  const pct=h('span',{class:'wp-ph-pct',id:'wppct-'+id},'0%');
-  const chev=h('span',{class:'wp-ph-chev',id:'wpc-'+id},'▾');
-  hdr.appendChild(numEl);hdr.appendChild(info);hdr.appendChild(bd);hdr.appendChild(pct);hdr.appendChild(chev);
-  ph.appendChild(hdr);
-  // Body
-  const body=h('div',{class:'wp-phase-body',id:'wpb-'+id});
-  // Progress bar
-  const prog=div('wp-ph-prog');
-  prog.appendChild(h('span',{style:{fontSize:'10px',color:'var(--tx2)'}},'Progreso'));
-  const pb=div('wp-ph-pbar');
-  const pf=h('div',{class:'wp-ph-pfill',id:'wpfp-'+id,style:{width:'0%',background:bgCol}});
-  pb.appendChild(pf);prog.appendChild(pb);
-  const pp=h('span',{style:{fontSize:'10px',fontWeight:'600'},id:'wpfpp-'+id},'0%');
-  prog.appendChild(pp);
-  body.appendChild(prog);
-  steps_content.forEach(s=>body.appendChild(s));
-  ph.appendChild(body);
-  return ph;
-}
-
-function renderWorkPlan(app,all){
+function renderWorkPlan(app, all){
   const obs=all.filter(e=>e.ob==='si');
-  const byR=r=>all.filter(e=>rv(e.cr,e.es)===r);
-  const rojos=byR('rojo');
 
-  // Header
-  const hdr=h('div',{class:'wp-hdr'});
-  hdr.appendChild(h('div',{class:'wp-eye'},'Jefatura Nacional de Mantenimiento — ACL'));
-  hdr.appendChild(h('h2',null,'Plan de Trabajo — Gestión de Obsolescencia Electrónica'));
-  hdr.appendChild(h('p',{style:{fontSize:'13px',color:'rgba(255,255,255,.65)'}},'Arca Continental Lindley · 6 plantas · Perú · Julio – Diciembre 2026'));
-  const meta=div('wp-meta');
-  meta.appendChild(h('span',null,'Responsable: ',h('strong',null,'Edwin Ampuero')));
-  meta.appendChild(h('span',null,'Aprueba: ',h('strong',null,'Fernando Soca')));
-  meta.appendChild(h('span',null,'Actualizado: ',h('strong',null,'21 julio 2026')));
-  hdr.appendChild(meta);
+  // ── Restore saved checkboxes ──
+  let wpSt={};
+  try{wpSt=JSON.parse(localStorage.getItem('acl-wp-v2')||'{}');}catch{}
+  function wpSave(){try{localStorage.setItem('acl-wp-v2',JSON.stringify(wpSt));}catch{}}
+
+  function mkChk(id, isStep){
+    const el=document.createElement('div');
+    el.id='wpck-'+id;
+    el.className=isStep?'wp-chk':'wp-sck';
+    el.textContent='✓';
+    if(wpSt[id]) el.classList.add('done');
+    el.addEventListener('click',function(e){
+      e.stopPropagation();
+      const d=this.classList.toggle('done');
+      wpSt[id]=d;
+      wpSave();
+      // update parent step line-through
+      const ps=document.getElementById('wpst-'+id);
+      if(ps) ps.classList.toggle('done',d);
+      wpCalcProg();
+    });
+    return el;
+  }
+
+  function wpCalcProg(){
+    const phases=[
+      {id:'f1',steps:['1-1','1-2','1-3']},
+      {id:'f2',steps:['2-1','2-2','2-3']},
+      {id:'f3',steps:['3-1','3-2','3-3']},
+      {id:'f4',steps:['4-1','4-2','4-3','4-4','4-5']},
+    ];
+    let tot=0,dn=0;
+    phases.forEach(ph=>{
+      const d=ph.steps.filter(s=>wpSt[s]).length;
+      const t=ph.steps.length;
+      const pct=t?Math.round(d/t*100):0;
+      ['wppm-'+ph.id,'wppct-'+ph.id].forEach(elId=>{
+        const el=document.getElementById(elId);
+        if(el) el.textContent=pct+'%';
+      });
+      const bd=document.getElementById('wpbd-'+ph.id);
+      if(bd) bd.textContent=d+' / '+t;
+      const fp=document.getElementById('wpfp-'+ph.id);
+      if(fp) fp.style.width=pct+'%';
+      const fpp=document.getElementById('wpfpp-'+ph.id);
+      if(fpp) fpp.textContent=pct+'%';
+      tot+=t; dn+=d;
+    });
+    const g=tot?Math.round(dn/tot*100):0;
+    const gp=document.getElementById('wp-gpct');
+    const gb=document.getElementById('wp-gbar');
+    if(gp) gp.textContent=g+'%';
+    if(gb) gb.style.width=g+'%';
+  }
+
+  function wpToggle(id){
+    const b=document.getElementById('wpb-'+id);
+    const c=document.getElementById('wpc-'+id);
+    if(!b||!c)return;
+    const open=b.classList.toggle('open');
+    c.textContent=open?'▴':'▾';
+  }
+
+  function step(sid, title, tags, resp, desc, subs, infoTxt, warnTxt){
+    const div=document.createElement('div');
+    div.id='wpst-'+sid;
+    div.className='wp-step'+(wpSt[sid]?' done':'');
+    div.style.cssText='padding:14px 16px;border-bottom:0.5px solid #f0efe9;transition:background .15s';
+
+    const top=document.createElement('div');
+    top.style.cssText='display:flex;gap:10px;align-items:flex-start';
+
+    const chk=mkChk(sid,true);
+    top.appendChild(chk);
+
+    const main=document.createElement('div');
+    main.style.flex='1';
+
+    // Title row
+    const trow=document.createElement('div');
+    trow.style.cssText='display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px';
+    const tspan=document.createElement('span');
+    tspan.style.cssText='font-size:13px;font-weight:500;color:var(--tx)';
+    tspan.textContent=title;
+    trow.appendChild(tspan);
+    tags.forEach(([t,c])=>{
+      const bg={g:'#eaf3de;color:#3b6d11',b:'#ddeeff;color:#0c3d72',o:'#faeeda;color:#854f0b',r:'#fcebeb;color:#a32d2d',gray:'#f0efe9;color:#6b6a64'}[c]||'#f0efe9;color:#6b6a64';
+      const sp=document.createElement('span');
+      sp.style.cssText='display:inline-block;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:'+bg;
+      sp.textContent=t;trow.appendChild(sp);
+    });
+    if(resp){
+      const r=document.createElement('span');
+      r.style.cssText='display:inline-flex;background:#ddeeff;color:#0c3d72;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:500';
+      r.textContent=resp;trow.appendChild(r);
+    }
+    main.appendChild(trow);
+
+    // Description
+    if(desc){
+      const d=document.createElement('p');
+      d.style.cssText='font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:7px';
+      d.textContent=desc;main.appendChild(d);
+    }
+
+    // Substeps
+    if(subs&&subs.length){
+      const sl=document.createElement('div');
+      sl.style.cssText='display:flex;flex-direction:column;gap:5px;margin-top:6px;padding-left:2px';
+      subs.forEach(([ssid,stxt])=>{
+        const ss=document.createElement('div');
+        ss.id='wpst-'+ssid;
+        ss.className='wp-ss'+(wpSt[ssid]?' done':'');
+        ss.style.cssText='display:flex;gap:7px;align-items:flex-start;font-size:12px;color:var(--tx2);cursor:pointer;padding:4px 6px;border-radius:5px;transition:background .15s';
+        ss.addEventListener('mouseenter',()=>ss.style.background='var(--s2)');
+        ss.addEventListener('mouseleave',()=>ss.style.background='transparent');
+        const sc=mkChk(ssid,false);
+        const st=document.createElement('span');
+        st.innerHTML=stxt;
+        ss.appendChild(sc);ss.appendChild(st);sl.appendChild(ss);
+      });
+      main.appendChild(sl);
+    }
+
+    // Info box
+    if(infoTxt){
+      const ib=document.createElement('div');
+      ib.style.cssText='background:#ddeeff;border:0.5px solid #4a9eff;border-radius:7px;padding:9px 12px;margin-top:8px;font-size:12px;color:#0c3d72';
+      ib.innerHTML=infoTxt;main.appendChild(ib);
+    }
+
+    // Warning box
+    if(warnTxt){
+      const wb=document.createElement('div');
+      wb.style.cssText='background:#fcebeb;border:0.5px solid #e24b4a;border-radius:7px;padding:9px 12px;margin-top:8px;font-size:12px;color:#a32d2d';
+      wb.innerHTML=warnTxt;main.appendChild(wb);
+    }
+
+    top.appendChild(main);
+    div.appendChild(top);
+    return div;
+  }
+
+  function phase(pid, num, bg, title, timing, badgeSt, steps_els){
+    const ph=document.createElement('div');
+    ph.style.cssText='border:0.5px solid var(--bd);border-radius:10px;margin-bottom:12px;overflow:hidden;background:var(--s1)';
+
+    // Header
+    const hdr=document.createElement('div');
+    hdr.style.cssText='padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;transition:background .15s';
+    hdr.addEventListener('mouseenter',()=>hdr.style.background='var(--s2)');
+    hdr.addEventListener('mouseleave',()=>hdr.style.background='transparent');
+
+    const numEl=document.createElement('div');
+    numEl.style.cssText='width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;background:'+bg;
+    numEl.textContent=num;
+
+    const info=document.createElement('div');
+    info.style.flex='1';
+    const ttl=document.createElement('div');
+    ttl.style.cssText='font-size:14px;font-weight:600;color:var(--tx)';
+    ttl.textContent=title;
+    const sub=document.createElement('div');
+    sub.style.cssText='font-size:11px;color:var(--tx2);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap;align-items:center';
+    const tm=document.createElement('span');
+    tm.style.cssText='background:var(--s2);padding:1px 7px;border-radius:8px;font-size:10px;font-weight:500;border:0.5px solid var(--bd)';
+    tm.textContent='⏱ '+timing;
+    sub.appendChild(tm);
+    info.appendChild(ttl);info.appendChild(sub);
+
+    const bd=document.createElement('span');
+    bd.id='wpbd-'+pid;
+    bd.style.cssText='font-size:11px;padding:2px 9px;border-radius:8px;font-weight:600;flex-shrink:0;'+badgeSt;
+    bd.textContent='0 / '+steps_els.length;
+
+    const pct=document.createElement('span');
+    pct.id='wppct-'+pid;
+    pct.style.cssText='font-size:12px;font-weight:700;flex-shrink:0;min-width:34px;text-align:right;color:'+bg;
+    pct.textContent='0%';
+
+    const chev=document.createElement('span');
+    chev.id='wpc-'+pid;
+    chev.style.cssText='color:var(--tx3);font-size:18px;flex-shrink:0';
+    chev.textContent='▾';
+
+    hdr.appendChild(numEl);hdr.appendChild(info);hdr.appendChild(bd);hdr.appendChild(pct);hdr.appendChild(chev);
+    hdr.addEventListener('click',()=>wpToggle(pid));
+    ph.appendChild(hdr);
+
+    // Body
+    const body=document.createElement('div');
+    body.id='wpb-'+pid;
+    body.style.cssText='border-top:0.5px solid var(--bd);display:none';
+
+    // Phase progress bar
+    const pp=document.createElement('div');
+    pp.style.cssText='padding:10px 16px;background:var(--s2);border-bottom:0.5px solid var(--bd);display:flex;align-items:center;gap:10px';
+    const pplbl=document.createElement('span');pplbl.style.cssText='font-size:10px;color:var(--tx2)';pplbl.textContent='Progreso';
+    const ppbar=document.createElement('div');ppbar.style.cssText='flex:1;height:5px;background:var(--bd);border-radius:3px;overflow:hidden';
+    const ppfill=document.createElement('div');
+    ppfill.id='wpfp-'+pid;
+    ppfill.style.cssText='height:100%;border-radius:3px;transition:width .4s;background:'+bg+';width:0%';
+    ppbar.appendChild(ppfill);
+    const pppct=document.createElement('span');
+    pppct.id='wpfpp-'+pid;
+    pppct.style.cssText='font-size:10px;font-weight:600;color:'+bg;
+    pppct.textContent='0%';
+    pp.appendChild(pplbl);pp.appendChild(ppbar);pp.appendChild(pppct);
+    body.appendChild(pp);
+
+    steps_els.forEach(s=>body.appendChild(s));
+    ph.appendChild(body);
+    return ph;
+  }
+
+  // ══ HEADER ══
+  const hdr=document.createElement('div');
+  hdr.style.cssText='background:linear-gradient(135deg,#0b1d3a,#163364);color:#fff;border-radius:12px;padding:28px 32px;margin-bottom:20px';
+  hdr.innerHTML=`
+    <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#4a9eff;margin-bottom:8px">JEFATURA NACIONAL DE MANTENIMIENTO — ACL</div>
+    <h2 style="font-size:22px;font-weight:700;margin-bottom:6px;color:#fff">Plan de Trabajo — Gestión de Obsolescencia Electrónica</h2>
+    <p style="font-size:13px;color:rgba(255,255,255,.65)">Arca Continental Lindley · 6 plantas · Perú · Julio – Diciembre 2026</p>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;font-size:11px">
+      <span style="color:rgba(255,255,255,.5)">Responsable: <strong style="color:#fff">Edwin Ampuero</strong></span>
+      <span style="color:rgba(255,255,255,.5)">Aprueba: <strong style="color:#fff">Fernando Soca</strong></span>
+      <span style="color:rgba(255,255,255,.5)">Actualizado: <strong style="color:#fff">21 julio 2026</strong></span>
+    </div>`;
   app.appendChild(hdr);
 
   // Print button
-  app.appendChild(h('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'14px'}},
-    h('button',{style:{background:'var(--ac)',color:'#fff',border:'none',borderRadius:'7px',padding:'7px 14px',fontSize:'12px',cursor:'pointer',fontWeight:'500'},onclick:()=>window.print()},'🖨️ Imprimir / Guardar PDF')
-  ));
+  const pb=document.createElement('div');
+  pb.style.cssText='display:flex;justify-content:flex-end;margin-bottom:14px';
+  const pbtn=document.createElement('button');
+  pbtn.style.cssText='background:var(--ac);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:500';
+  pbtn.textContent='🖨️ Imprimir / Guardar PDF';
+  pbtn.onclick=()=>window.print();
+  pb.appendChild(pbtn);app.appendChild(pb);
 
-  // KPIs diagnóstico
-  const krow=div('wp-kpi-row');
+  // KPIs
+  const kr=document.createElement('div');
+  kr.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:16px';
   [['5,663','Total equipos','var(--tx)'],['1,670','Obsoletos','#854f0b'],['927','Discontinued','#a32d2d'],['418','Phaseout','#854f0b'],['916','Sin stock','#a32d2d'],['754','Con stock','#3b6d11']].forEach(([v,l,c])=>{
-    const k=div('wp-kpi');
-    const kv=h('div',{class:'wp-kv',style:{color:c}});kv.textContent=v;
-    const kl=h('div',{class:'wp-kl'});kl.textContent=l;
-    k.appendChild(kv);k.appendChild(kl);krow.appendChild(k);
+    const k=document.createElement('div');
+    k.style.cssText='background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:10px;text-align:center';
+    k.innerHTML=`<div style="font-size:22px;font-weight:700;color:${c};line-height:1;margin-bottom:3px">${v}</div><div style="font-size:10px;color:var(--tx2)">${l}</div>`;
+    kr.appendChild(k);
   });
-  app.appendChild(krow);
+  app.appendChild(kr);
 
   // Global progress
-  const pg=div('wp-prog-global');
-  const pgHdr=h('div',{style:{fontSize:'12px',fontWeight:'600',marginBottom:'10px',display:'flex',justifyContent:'space-between'}},
-    h('span',null,'Progreso general del plan'),
-    h('span',{style:{color:'var(--ac)',fontWeight:'700'},id:'wp-gpct'},'0%')
-  );
-  pg.appendChild(pgHdr);
-  const pmRow=div('wp-phases-row');
-  [['wf1','1','#eaf3de','#3b6d11','Fase 1','Inventario'],['wf2','2','#ddeeff','#0c3d72','Fase 2','Diagnóstico'],['wf3','3','#faeeda','#854f0b','Fase 3','Base de datos'],['wf4','4','#f3e8ff','#7e22ce','Fase 4','Plan de acción']].forEach(([id,n,bg,tx,lbl,sub])=>{
-    const pm=h('div',{class:'wp-phase-mini',style:{background:bg,borderColor:tx},onclick:()=>{const el=document.getElementById('wp'+id.replace('w',''));if(el){el.scrollIntoView({behavior:'smooth',block:'start'});if(!document.getElementById('wpb-'+id.replace('w','')).classList.contains('open'))wpTogglePhase(id.replace('w',''));}}});
-    const pn=h('div',{class:'pm-n',style:{color:tx},id:'wppm-'+id});pn.textContent='0%';
-    const pl=h('div',{class:'pm-l',style:{color:tx}});pl.textContent=lbl;
-    const ps=h('div',{class:'pm-s',style:{color:tx}});ps.textContent=sub;
-    pm.appendChild(pn);pm.appendChild(pl);pm.appendChild(ps);pmRow.appendChild(pm);
+  const pg=document.createElement('div');
+  pg.style.cssText='background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:18px';
+  const phases=[
+    ['f1','Fase 1','Inventario','#eaf3de','#3b6d11'],
+    ['f2','Fase 2','Diagnóstico','#ddeeff','#0c3d72'],
+    ['f3','Fase 3','Base de datos','#faeeda','#854f0b'],
+    ['f4','Fase 4','Plan de acción','#f3e8ff','#7e22ce'],
+  ];
+  pg.innerHTML=`<div style="font-size:12px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between"><span>Progreso general del plan</span><span id="wp-gpct" style="color:var(--ac);font-weight:700">0%</span></div>`;
+  const pmRow=document.createElement('div');
+  pmRow.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px';
+  phases.forEach(([pid,lbl,sub,bg,tx])=>{
+    const pm=document.createElement('div');
+    pm.style.cssText='border-radius:8px;padding:10px;text-align:center;cursor:pointer;border:0.5px solid '+tx+';background:'+bg;
+    pm.innerHTML=`<div id="wppm-${pid}" style="font-size:18px;font-weight:700;color:${tx};line-height:1;margin-bottom:2px">0%</div><div style="font-size:10px;font-weight:600;color:${tx}">${lbl}</div><div style="font-size:9px;color:${tx};margin-top:2px;opacity:.75">${sub}</div>`;
+    pm.addEventListener('click',()=>wpToggle(pid));
+    pmRow.appendChild(pm);
   });
   pg.appendChild(pmRow);
-  const pb=div('wp-prog-bar');
-  const pf=h('div',{class:'wp-prog-fill',id:'wp-gbar',style:{width:'0%'}});
-  pb.appendChild(pf);pg.appendChild(pb);
+  const pgbar=document.createElement('div');
+  pgbar.style.cssText='height:8px;background:var(--bd);border-radius:4px;overflow:hidden';
+  pgbar.innerHTML='<div id="wp-gbar" style="height:100%;border-radius:4px;background:linear-gradient(90deg,#4ade80,#4a9eff);transition:width .5s;width:0%"></div>';
+  pg.appendChild(pgbar);
   app.appendChild(pg);
 
-  // ── FASE 1 ──
-  app.appendChild(wpPhase('f1','1','#4ade80',
-    'Fase 1 — Inventario: saber qué tienes','Semanas 1–3',
+  // ══════════ FASE 1 ══════════
+  app.appendChild(phase('f1','1','#4ade80','Fase 1 — Inventario: saber qué tienes','Semanas 1–3',
+    'background:#eaf3de;color:#3b6d11',
     [
-      wpStep('w1-1','Listar todas las plantas y líneas de producción',[['Inicio','g'],''],null,'Edwin + Jefes planta',
-        [['w1-1-1','Confirmar las 6 plantas con sus códigos: Pucusana (1040) · Trujillo (5040) · Zárate (2000) · Arequipa (7000) · Cuzco (7010) · Iquitos (6300)'],
-         ['w1-1-2','Levantar número de líneas de producción por planta con cada jefe de mantenimiento'],
-         ['w1-1-3','Definir áreas a cubrir: Tableros eléctricos · Paneles de control · Sala de instrumentación · SCADA'],
-         ['w1-1-4','Crear Excel base: Planta | Centro | Línea | Área | Denominación U.T.']],
-        'ACL ya tiene esto en el sistema: 5,663 equipos en Pucusana (3,926) · Trujillo (984) · Zárate (304) · Arequipa (236) · Cuzco (119) · Iquitos (94)',null,'Excel ACL + Sistema web'),
+      step('1-1','Listar todas las plantas y líneas de producción',
+        [['Inicio','g']],[],
+        'Edwin + Jefes planta',
+        'Crear el mapa completo de ACL: 6 plantas, líneas por planta y áreas. Es la columna vertebral del inventario.',
+        [
+          ['1-1-1','Confirmar las 6 plantas con sus códigos SAP: Pucusana (1040) · Trujillo (5040) · Zárate (2000) · Arequipa (7000) · Cuzco (7010) · Iquitos (6300)'],
+          ['1-1-2','Levantar número de líneas de producción por planta con cada jefe de mantenimiento'],
+          ['1-1-3','Definir áreas a cubrir: Tableros eléctricos · Paneles de control · Sala de instrumentación · SCADA'],
+          ['1-1-4','Crear Excel base: Planta | Centro | Línea | Área | Denominación U.T.'],
+        ],
+        '<strong>✅ ACL ya tiene esto:</strong> 5,663 equipos · Pucusana (3,926) · Trujillo (984) · Zárate (304) · Arequipa (236) · Cuzco (119) · Iquitos (94)',
+        null),
 
-      wpStep('w1-2','Levantar inventario de equipos electrónicos por planta',[],null,'Edwin + Ghersi + Técnicos',
-        [['w1-2-1','Registrar: Tipo de componente | Marca | Modelo | Código parte (MLFB) | N° SAP Montaje | N° SAP Componente'],
-         ['w1-2-2','Capturar: Familia | Código Obsolescencia | Cantidad | N° de serie | Año de fabricación/instalación'],
-         ['w1-2-3','Registrar SAP MORTIZ y descripción MORTIZ para equipos con mantenimiento mayor'],
-         ['w1-2-4','Verificar stock físico en almacén por planta y cruzar con SAP'],
-         ['w1-2-5','Consolidar en Excel unificado (33 campos del formato ACL) y cargar al sistema web']],
+      step('1-2','Levantar inventario de equipos electrónicos por planta',
+        [],null,
+        'Edwin + Ghersi + Técnicos',
+        'Recorrer físicamente cada tablero y panel. Registrar todos los datos técnicos necesarios para la consulta en SIOS.',
+        [
+          ['1-2-1','Registrar: Tipo de componente | Marca | Modelo | Código parte (MLFB) | N° SAP Montaje | N° SAP Componente'],
+          ['1-2-2','Capturar: Familia | Código Obsolescencia | Cantidad | N° de serie | Año de fabricación/instalación'],
+          ['1-2-3','Registrar SAP MORTIZ y descripción MORTIZ para equipos con mantenimiento mayor'],
+          ['1-2-4','Verificar stock físico en almacén por planta y cruzar con SAP (columnas: Stock almacén · Stock en curso · Disponibilidad final)'],
+          ['1-2-5','Consolidar en Excel unificado con los 33 campos del formato ACL y cargar al sistema web'],
+        ],
         null,
-        'Acción pendiente: Verificar cobertura 100% de líneas. Ghersi Chang tiene 300 equipos con responsable asignado.',
-        'Celular/tablet para fotos + Excel ACL + Sistema web'),
+        '<strong>⚠️ Verificar:</strong> Cobertura al 100% de líneas en cada planta. Ghersi Chang tiene 300 equipos con responsable asignado.'),
 
-      wpStep('w1-3','Priorizar equipos críticos (no todo es igual',[['Decisión clave','o']],null,'Meliza + Edwin',
-        [['w1-3-1','<strong>Alta:</strong> para la línea si falla · <strong>Media:</strong> afecta calidad/eficiencia · <strong>Baja:</strong> redundante o no crítico'],
-         ['w1-3-2','Asignar Prioridad de Migración: Urgente | Alta | Media | Baja a cada equipo obsoleto'],
-         ['w1-3-3','Verificar si hay repuesto en almacén SAP para cada equipo crítico — define el nivel de exposición real']],
-        'Estado actual ACL: 927 Urgente (Discontinued) · 418 Alta (Phaseout) · 916 obsoletos SIN stock de respaldo',null,null),
-    ],
-    'background:#eaf3de;color:#3b6d11'));
+      step('1-3','Priorizar equipos críticos (no todo es igual)',
+        [['Decisión clave','o']],null,
+        'Meliza + Edwin',
+        'Asignar criticidad según impacto en producción. Los equipos de Criticidad Alta son la primera prioridad absoluta.',
+        [
+          ['1-3-1','Definir criterio: <strong>Alta</strong> = para la línea si falla · <strong>Media</strong> = afecta calidad/eficiencia · <strong>Baja</strong> = redundante o no crítico'],
+          ['1-3-2','Asignar Prioridad de Migración a cada equipo obsoleto: Urgente | Alta | Media | Baja'],
+          ['1-3-3','Verificar si hay repuesto en almacén SAP para cada equipo crítico — define el nivel de exposición real'],
+        ],
+        '<strong>✅ Estado actual ACL:</strong> 927 Urgente (Discontinued) · 418 Alta (Phaseout) · 916 obsoletos SIN stock de respaldo',
+        null),
+    ]
+  ));
 
-  // ── FASE 2 ──
-  app.appendChild(wpPhase('f2','2','#4a9eff',
-    'Fase 2 — Diagnóstico: clasificar el estado de cada equipo','Semanas 4–6',
+  // ══════════ FASE 2 ══════════
+  app.appendChild(phase('f2','2','#4a9eff','Fase 2 — Diagnóstico: clasificar el estado de cada equipo','Semanas 4–6',
+    'background:#ddeeff;color:#0c3d72',
     [
-      wpStep('w2-1','Crear cuenta en SIOS y mySupport',[['Gratis','g']],null,'Edwin',
-        [['w2-1-1','Ir a <strong>support.industry.siemens.com</strong> → Register con email corporativo ACL'],
-         ['w2-1-2','Activar mySupport → agregar todos los equipos Siemens del inventario a la lista de seguimiento'],
-         ['w2-1-3','Configurar notificaciones por email para cambios de estado de ciclo de vida'],
-         ['w2-1-4','Para otros fabricantes: Rockwell → rockwellautomation.com · Schneider → se.com/productlifecycle · ABB → new.abb.com']],
-        null,null,'Portal: support.industry.siemens.com'),
+      step('2-1','Crear cuenta en SIOS y mySupport',
+        [['Gratis','g']],null,
+        'Edwin',
+        'SIOS (Siemens Industry Online Support) es el portal oficial para consultar el estado del ciclo de vida. mySupport permite crear alertas automáticas. Tiempo estimado: 20 minutos.',
+        [
+          ['2-1-1','Ir a <strong>support.industry.siemens.com</strong> → Register con email corporativo ACL'],
+          ['2-1-2','Activar mySupport → agregar todos los equipos Siemens del inventario a la lista de seguimiento'],
+          ['2-1-3','Configurar notificaciones por email para cambios de estado de ciclo de vida'],
+          ['2-1-4','Para otros fabricantes: Rockwell → rockwellautomation.com · Schneider → se.com/productlifecycle · ABB → new.abb.com'],
+        ],
+        '🌐 Portal: support.industry.siemens.com — Cuenta gratuita, sin contrato requerido',
+        null),
 
-      wpStep('w2-2','Consultar estado de ciclo de vida de cada equipo en SIOS',[],null,'Ghersi + Edwin',
-        [['w2-2-1','Buscar cada MLFB en SIOS → obtener estado: <span style="color:#3b6d11;font-weight:600">Active</span> | <span style="color:#185fa5;font-weight:600">Classic</span> | <span style="color:#854f0b;font-weight:600">Phaseout</span> | <span style="color:#a32d2d;font-weight:600">Discontinued</span>'],
-         ['w2-2-2','Registrar: fecha fin de soporte + producto de reemplazo sugerido por fabricante (campo "Cambio Sugerido")'],
-         ['w2-2-3','Guardar URL de la página SIOS de cada equipo en el campo "Respaldo" (trazabilidad y auditorías)'],
-         ['w2-2-4','Priorizar consulta: primero los 927 Urgente, luego 418 Alta, luego Media y Baja'],
-         ['w2-2-5','Actualizar campo "Obsoleto?" y "Prioridad Migración" en el Excel y recargar al sistema web']],
+      step('2-2','Consultar estado de ciclo de vida de cada equipo en SIOS',
+        [],null,
+        'Ghersi + Edwin',
+        'Buscar cada Código parte (MLFB) del inventario en SIOS para obtener el estado oficial del fabricante. Este paso define el nivel de riesgo real de cada equipo.',
+        [
+          ['2-2-1','Buscar cada MLFB en SIOS → obtener estado: <span style="color:#3b6d11;font-weight:600">Active</span> | <span style="color:#185fa5;font-weight:600">Classic</span> | <span style="color:#854f0b;font-weight:600">Phaseout</span> | <span style="color:#a32d2d;font-weight:600">Discontinued</span>'],
+          ['2-2-2','Registrar fecha de fin de soporte + producto de reemplazo sugerido por el fabricante (campo "Cambio Sugerido")'],
+          ['2-2-3','Guardar URL de la página SIOS en el campo "Respaldo" del Excel (para trazabilidad y auditorías)'],
+          ['2-2-4','Priorizar: primero los 927 Urgente, luego 418 Alta, luego Media y Baja'],
+          ['2-2-5','Actualizar campo "Obsoleto?" y "Prioridad Migración" en el Excel y recargar al sistema web'],
+        ],
         null,
-        'Acción inmediata esta semana: Los 927 Discontinued ya están identificados. Verificar en SIOS el "Cambio Sugerido" para los críticos de Pucusana (360 eq.) y Trujillo (90 eq.)',null),
+        '<strong>⚠️ Acción inmediata esta semana:</strong> Los 927 Discontinued ya están identificados. Verificar en SIOS el "Cambio Sugerido" para los críticos de Pucusana (360 eq.) y Trujillo (90 eq.)'),
 
-      wpStep('w2-3','Construir la matriz de riesgo de obsolescencia',[],null,'Edwin + Meliza',
-        [['w2-3-1','<strong>🔴 Crítico urgente</strong> = Discontinued + Alta → 927 equipos → Acción esta semana'],
-         ['w2-3-2','<strong>🟠 Alto riesgo</strong> = Phaseout + Alta/Media → 418 equipos → Plan en 12 meses'],
-         ['w2-3-3','<strong>🟡 Riesgo medio</strong> = Classic o Phaseout + Baja → 325 equipos → Monitorear'],
-         ['w2-3-4','Presentar matriz a Fernando Soca con los números reales de ACL para gestión de presupuesto']],
-        'El sistema web ya lo hace automáticamente: La pestaña "Matriz" muestra el cruce en tiempo real. Cada celda es clickeable y filtra el inventario.',null,null),
-    ],
-    'background:#ddeeff;color:#0c3d72'));
+      step('2-3','Construir la matriz de riesgo de obsolescencia',
+        [],null,
+        'Edwin + Meliza',
+        'Cruzar Criticidad × Estado ciclo de vida para generar el mapa de prioridades. El sistema web ya hace esto automáticamente.',
+        [
+          ['2-3-1','🔴 Crítico urgente = Discontinued + Criticidad Alta → 927 equipos → Acción esta semana'],
+          ['2-3-2','🟠 Alto riesgo = Phaseout + Alta/Media → 418 equipos → Plan en 12 meses'],
+          ['2-3-3','🟡 Riesgo medio = Classic o Phaseout + Baja → 325 equipos → Monitorear periódicamente'],
+          ['2-3-4','Presentar matriz a Fernando Soca con los números reales de ACL para gestión de presupuesto'],
+        ],
+        '<strong>✅ Ya disponible:</strong> La pestaña "Matriz" del sistema web muestra el cruce en tiempo real. Cada celda y número es clickeable y filtra el inventario automáticamente.',
+        null),
+    ]
+  ));
 
-  // ── FASE 3 ──
-  app.appendChild(wpPhase('f3','3','#ef9f27',
-    'Fase 3 — Base de datos: centralizar la información','Semanas 7–10',
+  // ══════════ FASE 3 ══════════
+  app.appendChild(phase('f3','3','#ef9f27','Fase 3 — Base de datos: centralizar la información','Semanas 7–10',
+    'background:#faeeda;color:#854f0b',
     [
-      wpStep('w3-1','Decidir dónde vivirá tu base de datos',[['Decisión clave','o']],null,'Edwin + Fernando',
-        [['w3-1-1','<strong>Solución actual (implementada):</strong> Excel mensual + Sistema web ACL (GitHub Pages) como visualización y gestión'],
-         ['w3-1-2','<strong>Solución futura (Fase 4):</strong> Integrar con SAP PM → clase de características "Obsolescencia" con campos Estado CV, Fin soporte, Reemplazo'],
-         ['w3-1-3','Definir responsable de actualización mensual del Excel y carga al sistema web (propuesta: Kevin Silva)']],
-        'Decisión tomada: Sistema web ACL en GitHub Pages + Excel unificado mensual. Sin costo de infraestructura.',null,null),
+      step('3-1','Decidir dónde vivirá tu base de datos',
+        [['Decisión clave','o']],null,
+        'Edwin + Fernando',
+        'ACL ya tiene una decisión tomada: Excel + Sistema web en GitHub Pages. Esta combinación cubre las necesidades sin costo adicional.',
+        [
+          ['3-1-1','<strong>Solución actual (implementada):</strong> Excel mensual + Sistema web ACL (GitHub Pages) como visualización y gestión'],
+          ['3-1-2','<strong>Solución futura (Fase 4):</strong> Integrar con SAP PM → clase de características "Obsolescencia" con campos Estado CV, Fin soporte, Reemplazo sugerido'],
+          ['3-1-3','Definir responsable de actualización mensual del Excel y carga al sistema web — Propuesta: Kevin Silva'],
+        ],
+        '<strong>✅ Decisión tomada:</strong> Sistema web ACL en GitHub Pages + Excel unificado mensual. Sin costo de infraestructura.',
+        null),
 
-      wpStep('w3-2','Estructurar la base de datos maestra',[],null,'Edwin + Kevin',
-        [['w3-2-1','Completar campo <strong>Responsable</strong> para todos los equipos (actualmente solo 300 de 5,663 = 5%)'],
-         ['w3-2-2','Completar campo <strong>Fecha de actualización</strong> para todos los registros (actualmente solo 15 tienen fecha)'],
-         ['w3-2-3','Completar <strong>Monto estimado de reemplazo</strong> para los 927 Discontinued (gestión presupuestal)'],
-         ['w3-2-4','Completar <strong>Comentario de obsolescencia</strong> para los equipos sin notas'],
-         ['w3-2-5','Rutina mensual: actualizar Excel primer lunes de cada mes → cargar nuevo index.html al sistema web']],
+      step('3-2','Estructurar la base de datos maestra',
+        [],null,
+        'Edwin + Kevin',
+        'El Excel ACL ya tiene 33 columnas estructuradas. Ahora hay que completar los campos que faltan y establecer la rutina de mantenimiento.',
+        [
+          ['3-2-1','Completar campo <strong>Responsable</strong> para todos los equipos (actualmente solo 300 de 5,663 tienen responsable = 5%)'],
+          ['3-2-2','Completar campo <strong>Fecha de actualización</strong> para todos los registros (actualmente solo 15 tienen fecha)'],
+          ['3-2-3','Completar <strong>Monto estimado de reemplazo</strong> para los 927 Discontinued (necesario para gestión presupuestal)'],
+          ['3-2-4','Completar <strong>Comentario de obsolescencia</strong> para los equipos sin notas (campo vacío en muchos registros)'],
+          ['3-2-5','Establecer rutina mensual: actualizar Excel el primer lunes de cada mes → cargar nuevo index.html al sistema web'],
+        ],
         null,
-        'Campos críticos incompletos: Responsable: solo 5% completo · Monto estimado: solo 2 de 1,670 · Fecha actualización: solo 15 registros',null),
+        '<strong>⚠️ Campos críticos incompletos:</strong> Responsable: solo 5% completo · Monto estimado: solo 2 de 1,670 · Fecha actualización: solo 15 registros'),
 
-      wpStep('w3-3','Conectar mySupport para actualizaciones automáticas',[['Gratis','g']],null,'Edwin',
-        [['w3-3-1','Agregar todos los MLFB Siemens a la lista de seguimiento de mySupport (empezar por los 927 Urgente)'],
-         ['w3-3-2','Cuando llegue alerta mySupport → actualizar Estado CV en el Excel → recargar al sistema web'],
-         ['w3-3-3','Futuro (Fase 4): Power Automate → email mySupport actualiza automáticamente SharePoint/SAP']],
-        null,null,'Portal: support.industry.siemens.com/My/'),
-    ],
-    'background:#faeeda;color:#854f0b'));
+      step('3-3','Conectar mySupport para actualizaciones automáticas',
+        [['Gratis','g']],null,
+        'Edwin',
+        'mySupport envía alertas por email cuando un producto cambia de estado. Garantiza que el sistema esté siempre actualizado sin depender de revisiones manuales.',
+        [
+          ['3-3-1','Agregar todos los MLFB Siemens a la lista de seguimiento de mySupport (empezar por los 927 Urgente primero)'],
+          ['3-3-2','Cuando llegue alerta de mySupport → actualizar el campo Estado CV en el Excel → recargar al sistema web'],
+          ['3-3-3','Futuro (Fase 4): Power Automate → email de mySupport actualiza automáticamente SharePoint/SAP PM'],
+        ],
+        '🌐 Portal: support.industry.siemens.com/My/ — Alertas automáticas gratuitas para equipos Siemens',
+        null),
+    ]
+  ));
 
-  // ── FASE 4 ──
-  app.appendChild(wpPhase('f4','4','#a855f7',
-    'Fase 4 — Plan de acción: atacar los rojos y naranjas','Mes 3 en adelante',
+  // ══════════ FASE 4 ══════════
+  app.appendChild(phase('f4','4','#a855f7','Fase 4 — Plan de acción: atacar los rojos y naranjas','Mes 3 en adelante',
+    'background:#f3e8ff;color:#7e22ce',
     [
-      wpStep('w4-1','Generar plan de migración por prioridad',[['Urgente','r']],null,'Edwin + Kevin',
-        [['w4-1-1','Filtrar en el sistema web: <strong>🔴 Críticos + sin stock</strong> → máxima urgencia (filtro "Sin stock ❌" + riesgo "Crítico")'],
-         ['w4-1-2','Para cada equipo crítico: definir reemplazo exacto (referencia técnica del fabricante) y conseguir cotización'],
-         ['w4-1-3','Usar TIA Migration Tool para S7-300/400 → evaluar esfuerzo de migración a TIA Portal S7-1500 antes de comprometer fecha'],
-         ['w4-1-4','Asignar en el sistema web: Responsable ACL + Fecha migración planificada + Notas para cada equipo del plan']],
-        null,'Prioridad máxima: Pucusana con 360 críticos sin stock. Iniciar plan esta semana con Ghersi.',null),
+      step('4-1','Generar plan de migración por prioridad',
+        [['Urgente','r']],null,
+        'Edwin + Kevin',
+        'Crear un plan detallado para cada equipo 🔴 y 🟠, con reemplazo definido, fecha, responsable técnico y presupuesto. Sincronizar con paradas programadas.',
+        [
+          ['4-1-1','Filtrar en el sistema web: <strong>🔴 Críticos + sin stock</strong> → esta es la lista de máxima urgencia (filtro "Sin stock ❌" + riesgo "Crítico urgente")'],
+          ['4-1-2','Para cada equipo crítico: definir reemplazo exacto (referencia técnica del fabricante) y conseguir cotización con Compras'],
+          ['4-1-3','Usar TIA Migration Tool para proyectos STEP 7 (S7-300/400) → evaluar esfuerzo de migración a TIA Portal S7-1500 antes de comprometer fecha'],
+          ['4-1-4','Asignar en el sistema web: Responsable ACL + Fecha migración planificada + Notas para cada equipo del plan (editable desde el modal de detalle)'],
+        ],
+        null,
+        '<strong>🚨 Prioridad máxima:</strong> Pucusana tiene 360 críticos sin stock. Iniciar plan esta semana con Ghersi Chang.'),
 
-      wpStep('w4-2','Gestión de compras urgente — 916 sin stock',[['Urgente','r']],null,'Miguel MRO + Compras',
-        [['w4-2-1','Exportar lista de 916 equipos sin stock desde el sistema web (filtro "Obs. sin stock ❌") → enviar a Compras con código SAP y costo estimado'],
-         ['w4-2-2','Priorizar compras: Lote 1 → 360 sin stock Pucusana · Lote 2 → 90 Trujillo · Lote 3 → resto de plantas'],
-         ['w4-2-3','Para equipos Discontinued: evaluar si comprar repuesto original (last-time-buy) o directamente el equipo de reemplazo'],
-         ['w4-2-4','Actualizar "Stock fisico Almacen" y "Disponibilidad final" en el Excel al recibir cada compra']],
-        null,null,null),
+      step('4-2','Gestión de compras urgente — 916 equipos sin stock',
+        [['Urgente','r']],null,
+        'Miguel MRO + Compras',
+        'Los 916 equipos obsoletos sin stock de respaldo son el mayor riesgo operacional. Si alguno falla antes de ser reemplazado, no hay repuesto disponible.',
+        [
+          ['4-2-1','Exportar lista de 916 sin stock desde el sistema web (filtro "Obs. sin stock ❌") → enviar a Compras con código SAP, fabricante, modelo y costo estimado'],
+          ['4-2-2','Priorizar compras: Lote 1 → 360 sin stock Pucusana · Lote 2 → 90 Trujillo · Lote 3 → Zárate/Arequipa/Cuzco/Iquitos'],
+          ['4-2-3','Para equipos Discontinued: evaluar si comprar repuesto original (last-time-buy) o directamente el equipo de reemplazo nuevo'],
+          ['4-2-4','Actualizar "Stock fisico Almacen" y "Disponibilidad final" en el Excel al recibir cada compra → recargar al sistema web'],
+        ],
+        null,
+        null),
 
-      wpStep('w4-3','Ejecutar migraciones en paradas programadas',[],null,'Ghersi + Edwin + Técnicos planta',
-        [['w4-3-1','<strong>Pucusana (sep 2026):</strong> PLCs S7-300/400 → S7-1500 · HMIs → WinCC Unified · Coordinar con parada general'],
-         ['w4-3-2','<strong>Trujillo (sep-oct 2026):</strong> 90 equipos críticos · Coordinar con Jefe de Mantenimiento Trujillo'],
-         ['w4-3-3','<strong>Zárate, Arequipa, Cuzco, Iquitos (oct-nov 2026):</strong> Menor volumen — planificar en paradas menores'],
-         ['w4-3-4','Tras cada migración: actualizar "Obsoleto? = No" + "Estado CV = Active" en el Excel + recargar al sistema web']],
-        null,null,'TIA Portal + TIA Migration Tool + Siemens Upgrade Service'),
+      step('4-3','Ejecutar migraciones en paradas programadas',
+        [],null,
+        'Ghersi + Edwin + Técnicos planta',
+        'Las migraciones deben coordinarse con producción. Kevin coordina fechas con mínimo 4 semanas de anticipación.',
+        [
+          ['4-3-1','<strong>Pucusana (sep 2026):</strong> PLCs S7-300/400 → S7-1500 · HMIs Discontinued → WinCC Unified · Coordinar con parada general de planta'],
+          ['4-3-2','<strong>Trujillo (sep-oct 2026):</strong> 90 equipos críticos · Coordinar con Jefe de Mantenimiento Trujillo'],
+          ['4-3-3','<strong>Zárate, Arequipa, Cuzco, Iquitos (oct-nov 2026):</strong> Menor volumen — planificar en paradas menores de cada planta'],
+          ['4-3-4','Tras cada migración completada: actualizar "Obsoleto? = No" y "Estado CV = Active" en el Excel + recargar al sistema web'],
+        ],
+        '🔧 Herramienta clave: TIA Portal + TIA Migration Tool + Siemens Upgrade Service (para casos complejos)',
+        null),
 
-      wpStep('w4-4','Crear dashboard de seguimiento para Fernando Soca',[],null,'Edwin',
-        [['w4-4-1','Revisión mensual con Fernando: presentar dashboard del sistema web (filtros por planta, KPIs de avance)'],
-         ['w4-4-2','KPIs a reportar: N° migraciones ejecutadas · Reducción de Discontinued · Sin stock resueltos · Presupuesto ejecutado'],
-         ['w4-4-3','Meta diciembre 2026: Discontinued &lt; 200 · Sin stock &lt; 300']],
-        null,null,null),
+      step('4-4','Crear dashboard de seguimiento para Fernando Soca',
+        [],null,
+        'Edwin',
+        'Revisión mensual con evidencia visual del avance: equipos migrados, reducción de riesgo, gasto ejecutado vs. presupuesto.',
+        [
+          ['4-4-1','Revisión mensual con Fernando: presentar dashboard del sistema web (pestaña Dashboard + filtros por planta)'],
+          ['4-4-2','KPIs a reportar: N° migraciones ejecutadas · Reducción de Discontinued · N° sin stock resueltos · Presupuesto ejecutado'],
+          ['4-4-3','Meta diciembre 2026: Discontinued reducido de 927 a <200 · Sin stock reducido de 916 a <300'],
+        ],
+        null,
+        null),
 
-      wpStep('w4-5','Establecer rutina permanente de mantenimiento del sistema',[],null,'Kevin + Edwin',
-        [['w4-5-1','<strong>Mensual (Kevin):</strong> Revisar alertas mySupport + actualizar Excel + cargar nuevo index.html al sistema web'],
-         ['w4-5-2','<strong>Al instalar equipo nuevo:</strong> agregar al Excel ese mismo día — Jefe de planta notifica a Edwin'],
-         ['w4-5-3','<strong>Trimestral (Edwin):</strong> Revisar avance del plan de migración con cada jefe de planta'],
-         ['w4-5-4','<strong>Anual (Edwin + Fernando):</strong> Auditoría completa + definir plan y presupuesto del siguiente año'],
-         ['w4-5-5','<strong>Futuro — Integrar con Senseye:</strong> cruzar predicción de fallo con riesgo de obsolescencia']],
-        null,null,null),
-    ],
-    'background:#f3e8ff;color:#7e22ce'));
+      step('4-5','Establecer rutina permanente de mantenimiento del sistema',
+        [],null,
+        'Kevin + Edwin',
+        'El sistema solo funciona si se mantiene actualizado. La rutina garantiza visibilidad de obsolescencia de forma permanente en ACL.',
+        [
+          ['4-5-1','<strong>Mensual (Kevin):</strong> Revisar alertas mySupport + actualizar Excel + cargar nuevo index.html al sistema web'],
+          ['4-5-2','<strong>Al instalar equipo nuevo:</strong> agregar al Excel ese mismo día — Jefe de planta notifica a Edwin/Kevin'],
+          ['4-5-3','<strong>Trimestral (Edwin):</strong> Revisar avance del plan de migración con cada jefe de planta'],
+          ['4-5-4','<strong>Anual (Edwin + Fernando):</strong> Auditoría completa del inventario + definir plan y presupuesto del siguiente año'],
+          ['4-5-5','<strong>Futuro:</strong> Integrar con Senseye → cruzar predicción de fallo con riesgo de obsolescencia para mantenimiento proactivo total'],
+        ],
+        null,
+        null),
+    ]
+  ));
 
-  // Gantt
-  const gc=div('card');
+  // ══ GANTT ══
+  const gc=document.createElement('div');
+  gc.className='card';
   gc.style.marginTop='8px';
-  gc.appendChild(h('p',{style:{fontSize:'13px',fontWeight:'600',marginBottom:'10px'}},'📅 Cronograma — Julio a Diciembre 2026'));
-  const gw=div('scroll');
-  const gt=h('table',{class:'wp-gantt'});
-  const gh=h('thead',null,h('tr',null,
-    h('th',{style:{textAlign:'left'}},'Actividad'),
-    ...['Jul 2026','Ago 2026','Sep 2026','Oct 2026','Nov 2026','Dic 2026'].map(m=>h('th',null,m))
-  ));
-  const gd=[
-    ['Fase 1 · Inventario',[{c:'#4ade80',t:'✓ DONE'},[],[],[],[],[]]],
-    ['Fase 2 · Diagnóstico',[{c:'#4a9eff',t:'▌'},{c:'#4a9eff',t:'▌'},[],[],[],[]]],
-    ['Fase 3 · Base de datos',[],[{c:'#ef9f27',t:'▌'},{c:'#ef9f27',t:'▌'},[],[],[]]],
-    ['Fase 4 · Compras urgentes',[],[{c:'#a855f7',t:'▌'},{c:'#a855f7',t:'▌'},[],[],[]]],
-    ['Fase 4 · Migraciones Pucusana+Trujillo',[],[],[{c:'#e24b4a',t:'SEP'},{c:'#e24b4a',t:'OCT'},[],[]]],
-    ['Fase 4 · Zárate, Arequipa, Cuzco, Iquitos',[],[],[],[{c:'#e24b4a',t:'OCT'},{c:'#e24b4a',t:'NOV'},[]]],
-    ['Fase 4 · Senseye + Rutinas',[],[],[],[],[{c:'#a855f7',t:'NOV'},{c:'#a855f7',t:'DIC'}]],
-    ['Revisiones Fernando Soca',[],[{c:'#1760a8',t:'REV 1'},[],[{c:'#1760a8',t:'REV 2'},[],[{c:'#1760a8',t:'ANUAL'}]]]]
-  ];
-  const gb=h('tbody',null,...gd.map(([label,cells])=>
-    h('tr',null,
-      h('td',null,label),
-      ...Array(6).fill(null).map((_,i)=>{
-        const c=cells[i];
-        if(!c||Array.isArray(c))return h('td',null,'');
-        const bar=h('div',{class:'wp-gbar',style:{background:c.c}});bar.textContent=c.t;
-        return h('td',null,bar);
-      })
-    )
-  ));
-  gt.appendChild(gh);gt.appendChild(gb);gw.appendChild(gt);gc.appendChild(gw);
+  gc.innerHTML=`
+    <p style="font-size:13px;font-weight:600;margin-bottom:10px">📅 Cronograma — Julio a Diciembre 2026</p>
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:11px">
+      <thead><tr>
+        <th style="padding:5px 8px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:left;min-width:200px">Actividad</th>
+        ${['Jul','Ago','Sep','Oct','Nov','Dic'].map(m=>`<th style="padding:5px 8px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:center;min-width:65px">${m} 2026</th>`).join('')}
+      </tr></thead>
+      <tbody>
+        ${[
+          ['Fase 1 · Inventario','#4ade80','✓',1,0,0,0,0,0],
+          ['Fase 2 · Diagnóstico SIOS','#4a9eff','▌',1,1,0,0,0,0],
+          ['Fase 3 · Base de datos','#ef9f27','▌',0,1,1,0,0,0],
+          ['Fase 4 · Compras urgentes','#a855f7','▌',0,1,1,0,0,0],
+          ['Fase 4 · Migraciones Pucusana','#e24b4a','⚒',0,0,1,0,0,0],
+          ['Fase 4 · Migraciones Trujillo','#e24b4a','⚒',0,0,1,1,0,0],
+          ['Fase 4 · Zárate/Arequipa/Cuzco/Iquitos','#e24b4a','⚒',0,0,0,1,1,0],
+          ['Fase 4 · Senseye + Rutinas permanentes','#a855f7','▌',0,0,0,0,1,1],
+          ['Revisiones con Fernando Soca','#1760a8','REV',0,1,0,1,0,1],
+        ].map(([lbl,c,t,...cols])=>`
+          <tr>
+            <td style="padding:5px 8px;border-bottom:0.5px solid var(--bd);font-size:11px">${lbl}</td>
+            ${cols.map(on=>on?`<td style="padding:3px 5px;border-bottom:0.5px solid var(--bd)"><div style="height:16px;border-radius:3px;background:${c};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff">${t}</div></td>`:`<td style="border-bottom:0.5px solid var(--bd)"></td>`).join('')}
+          </tr>`).join('')}
+      </tbody>
+    </table></div>`;
   app.appendChild(gc);
 
   app.appendChild(h('p',{style:{fontSize:'11px',color:'var(--tx3)',textAlign:'center',marginTop:'1.5rem',paddingTop:'1rem',borderTop:'0.5px solid var(--bd)'}},'Plan de Trabajo · ACL · Gestión Obsolescencia Electrónica · Julio 2026'));
 
-  // Restore state after render
-  setTimeout(()=>wpRestoreState(),50);
+  // Open all phases by default
+  ['f1','f2','f3','f4'].forEach(pid=>{
+    const b=document.getElementById('wpb-'+pid);
+    if(b){b.style.display='block';}
+    const c=document.getElementById('wpc-'+pid);
+    if(c){c.textContent='▴';}
+  });
+
+  // CSS for wp-chk and wp-sck
+  if(!document.getElementById('wp-extra-css')){
+    const s=document.createElement('style');
+    s.id='wp-extra-css';
+    s.textContent=`.wp-chk{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--bd2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .2s;font-size:11px;font-weight:700;color:transparent;background:transparent}.wp-chk:hover{border-color:#4a9eff}.wp-chk.done{background:#4ade80;border-color:#4ade80;color:#fff}.wp-sck{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--bd2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-size:8px;font-weight:700;color:transparent;cursor:pointer}.wp-sck.done{background:#4ade80;border-color:#4ade80;color:#fff}.wp-step.done>div>div:last-child>div:first-child{text-decoration:line-through;color:var(--tx2)}`;
+    document.head.appendChild(s);
+  }
+
+  wpCalcProg();
 }
 
 function render(){
