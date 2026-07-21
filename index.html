@@ -97,6 +97,7 @@ function h(tag,attrs,...ch){
     if(k==='class')el.className=v;
     else if(k==='style'&&typeof v==='object')Object.assign(el.style,v);
     else if(k.startsWith('on'))el.addEventListener(k.slice(2).toLowerCase(),v);
+    else if(k==='disabled'){if(v)el.disabled=true;}
     else el.setAttribute(k,v);
   });
   ch.flat(Infinity).forEach(c=>{if(c==null||c===false)return;el.appendChild(typeof c==='string'||typeof c==='number'?document.createTextNode(String(c)):c);});
