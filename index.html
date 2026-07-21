@@ -56,7 +56,75 @@ tr:hover td{background:var(--s2)}
 .fbar select{width:auto;min-width:100px}
 .fbar input{flex:1;min-width:160px;width:auto}
 .results-info{font-size:12px;color:var(--tx2);margin-bottom:8px;display:flex;align-items:center;gap:8px}
-.clear-btn{font-size:11px;padding:2px 8px;border-radius:10px;cursor:pointer;background:var(--s2);border:0.5px solid var(--bd);color:var(--tx2)}</style>
+.clear-btn{font-size:11px;padding:2px 8px;border-radius:10px;cursor:pointer;background:var(--s2);border:0.5px solid var(--bd);color:var(--tx2)}
+/* ── Work Plan ── */
+.wp-hdr{background:linear-gradient(135deg,#0b1d3a,#163364);color:#fff;border-radius:12px;padding:28px 32px;margin-bottom:20px}
+.wp-eye{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#4a9eff;margin-bottom:8px}
+.wp-hdr h2{font-size:22px;font-weight:700;margin-bottom:6px}
+.wp-meta{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;font-size:11px}
+.wp-meta span{color:rgba(255,255,255,.5)}.wp-meta strong{color:#fff}
+.wp-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:18px}
+.wp-kpi{background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:10px;text-align:center}
+.wp-kv{font-size:22px;font-weight:700;line-height:1;margin-bottom:3px}
+.wp-kl{font-size:10px;color:var(--tx2);line-height:1.4}
+.wp-prog-global{background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:18px}
+.wp-phases-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.wp-phase-mini{border-radius:8px;padding:10px;text-align:center;cursor:pointer;transition:transform .15s;border:0.5px solid transparent}
+.wp-phase-mini:hover{transform:translateY(-2px)}
+.wp-phase-mini .pm-n{font-size:18px;font-weight:700;line-height:1;margin-bottom:2px}
+.wp-phase-mini .pm-l{font-size:10px;font-weight:600}
+.wp-phase-mini .pm-s{font-size:9px;margin-top:2px;opacity:.75}
+.wp-prog-bar{height:8px;background:var(--bd);border-radius:4px;overflow:hidden}
+.wp-prog-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#4ade80,#4a9eff);transition:width .5s}
+.wp-phase{border:0.5px solid var(--bd);border-radius:10px;margin-bottom:12px;overflow:hidden;background:var(--s1)}
+.wp-ph-hdr{padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;transition:background .15s}
+.wp-ph-hdr:hover{background:var(--s2)}
+.wp-ph-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.wp-ph-info{flex:1}
+.wp-ph-title{font-size:14px;font-weight:600;color:var(--tx)}
+.wp-ph-sub{font-size:11px;color:var(--tx2);margin-top:2px;display:flex;gap:10px;flex-wrap:wrap}
+.wp-ph-timing{background:var(--s2);padding:1px 7px;border-radius:8px;font-size:10px;font-weight:500;border:0.5px solid var(--bd)}
+.wp-ph-badge{font-size:11px;padding:2px 9px;border-radius:8px;font-weight:600;flex-shrink:0}
+.wp-ph-pct{font-size:12px;font-weight:700;flex-shrink:0;min-width:34px;text-align:right}
+.wp-ph-chev{color:var(--tx3);font-size:18px;transition:transform .2s;flex-shrink:0}
+.wp-ph-chev.open{transform:rotate(180deg)}
+.wp-phase-body{display:none;border-top:0.5px solid var(--bd)}
+.wp-phase-body.open{display:block}
+.wp-ph-prog{padding:10px 16px;background:var(--s2);border-bottom:0.5px solid var(--bd);display:flex;align-items:center;gap:10px}
+.wp-ph-pbar{flex:1;height:5px;background:var(--bd);border-radius:3px;overflow:hidden}
+.wp-ph-pfill{height:100%;border-radius:3px;transition:width .4s}
+.wp-step{padding:14px 16px;border-bottom:0.5px solid #f0efe9;transition:background .15s}
+.wp-step:last-child{border-bottom:none}
+.wp-step:hover{background:var(--s2)}
+.wp-step-top{display:flex;gap:10px;align-items:flex-start}
+.wp-chk{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--bd);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:2px;transition:all .2s;font-size:11px;font-weight:700}
+.wp-chk:hover{border-color:#4a9eff}
+.wp-step.done .wp-chk{background:#4ade80;border-color:#4ade80;color:#fff}
+.wp-step.done .wp-step-title{text-decoration:line-through;color:var(--tx2)}
+.wp-step-main{flex:1}
+.wp-step-title{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.wp-step-desc{font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:8px}
+.wp-substeps{margin-top:8px;display:flex;flex-direction:column;gap:5px}
+.wp-ss{display:flex;gap:7px;align-items:flex-start;font-size:12px;color:var(--tx2);cursor:pointer;padding:4px 6px;border-radius:5px;transition:background .15s}
+.wp-ss:hover{background:var(--bd)}
+.wp-ss-chk{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--bd2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:8px;font-weight:700;transition:all .2s}
+.wp-ss.done .wp-ss-chk{background:#4ade80;border-color:#4ade80;color:#fff}
+.wp-ss.done span{text-decoration:line-through;color:var(--tx3)}
+.wp-tag{display:inline-block;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600}
+.wp-tag-g{background:#eaf3de;color:#3b6d11}
+.wp-tag-b{background:#ddeeff;color:#0c3d72}
+.wp-tag-o{background:#faeeda;color:#854f0b}
+.wp-tag-r{background:#fcebeb;color:#a32d2d}
+.wp-resp{display:inline-flex;align-items:center;background:#ddeeff;color:#0c3d72;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:500}
+.wp-info{background:#ddeeff;border:0.5px solid #4a9eff;border-radius:7px;padding:10px 12px;margin-top:8px;font-size:12px;color:#0c3d72}
+.wp-warn{background:#fcebeb;border:0.5px solid #e24b4a;border-radius:7px;padding:10px 12px;margin-top:8px;font-size:12px;color:#a32d2d}
+.wp-tool{display:inline-flex;align-items:center;gap:3px;background:#0b1d3a;color:#4a9eff;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500;margin-top:6px}
+.wp-gantt{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}
+.wp-gantt th{padding:5px 7px;border-bottom:0.5px solid var(--bd);background:var(--s2);color:var(--tx2);font-weight:500;text-align:center;min-width:65px}
+.wp-gantt th:first-child{text-align:left;min-width:200px}
+.wp-gantt td{padding:5px 7px;border-bottom:0.5px solid var(--bd);color:var(--tx);font-size:11px}
+.wp-gbar{height:16px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;letter-spacing:.5px}
+</style>
 </head>
 <body>
 <div id="app" style="max-width:1100px;margin:0 auto;padding:1rem"></div>
@@ -188,6 +256,360 @@ function renderDetail(e){
   ovl.appendChild(box);return ovl;
 }
 
+
+// ══════════════════════════════════════════════════════
+//  PLAN DE TRABAJO
+// ══════════════════════════════════════════════════════
+const WP_STEPS={
+  'wf1':['w1-1','w1-2','w1-3'],
+  'wf2':['w2-1','w2-2','w2-3'],
+  'wf3':['w3-1','w3-2','w3-3'],
+  'wf4':['w4-1','w4-2','w4-3','w4-4','w4-5']
+};
+let wpState={};
+try{wpState=JSON.parse(localStorage.getItem('acl-wp-v1')||'{}');}catch{}
+function wpSave(){try{localStorage.setItem('acl-wp-v1',JSON.stringify(wpState));}catch{}}
+
+function wpToggleStep(id){
+  const el=document.getElementById('wps-'+id);
+  if(!el)return;
+  const done=el.classList.contains('done');
+  el.classList.toggle('done',!done);
+  wpState['wps-'+id]=!done;
+  wpSave();wpUpdateProg();
+}
+function wpToggleSub(id){
+  const el=document.getElementById('wpss-'+id);
+  if(!el)return;
+  const done=el.classList.contains('done');
+  el.classList.toggle('done',!done);
+  wpState['wpss-'+id]=!done;
+  wpSave();
+}
+function wpTogglePhase(id){
+  const body=document.getElementById('wpb-'+id);
+  const chev=document.getElementById('wpc-'+id);
+  if(!body||!chev)return;
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  chev.classList.toggle('open',!open);
+}
+function wpUpdateProg(){
+  let tot=0,dn=0;
+  Object.entries(WP_STEPS).forEach(([ph,steps])=>{
+    const d=steps.filter(s=>document.getElementById('wps-'+s)?.classList.contains('done')).length;
+    const t=steps.length;
+    const pct=t>0?Math.round(d/t*100):0;
+    const pmn=document.getElementById('wppm-'+ph);
+    const phb=document.getElementById('wppb-'+ph);
+    const phpct=document.getElementById('wppct-'+ph);
+    const fp=document.getElementById('wpfp-'+ph);
+    const fpp=document.getElementById('wpfpp-'+ph);
+    const bd=document.getElementById('wpbd-'+ph);
+    if(pmn)pmn.textContent=pct+'%';
+    if(phb)phb.textContent=d+' / '+t;
+    if(phpct)phpct.textContent=pct+'%';
+    if(fp)fp.style.width=pct+'%';
+    if(fpp)fpp.textContent=pct+'%';
+    if(bd)bd.textContent=d+' / '+t;
+    tot+=t;dn+=d;
+  });
+  const g=tot>0?Math.round(dn/tot*100):0;
+  const gpct=document.getElementById('wp-gpct');
+  const gbar=document.getElementById('wp-gbar');
+  if(gpct)gpct.textContent=g+'%';
+  if(gbar)gbar.style.width=g+'%';
+}
+function wpRestoreState(){
+  Object.entries(wpState).forEach(([k,v])=>{
+    if(!v)return;
+    const el=document.getElementById(k);
+    if(el){
+      if(k.startsWith('wps-'))el.classList.add('done');
+      else if(k.startsWith('wpss-'))el.classList.add('done');
+    }
+  });
+  wpUpdateProg();
+}
+
+function wpStep(id,title,desc,tags,resp,subs,info,warn,tool){
+  const step=h('div',{class:'wp-step',id:'wps-'+id});
+  const top=div('wp-step-top');
+  const chk=h('div',{class:'wp-chk',onclick:()=>wpToggleStep(id)},'✓');
+  const main=div('wp-step-main');
+  const titleEl=h('div',{class:'wp-step-title'});
+  titleEl.appendChild(document.createTextNode(title));
+  tags.forEach(([t,cls])=>{const sp=h('span',{class:'wp-tag wp-tag-'+cls});sp.textContent=t;titleEl.appendChild(sp);});
+  if(resp){const r=h('span',{class:'wp-resp'});r.textContent=resp;titleEl.appendChild(r);}
+  main.appendChild(titleEl);
+  if(desc){const d=h('p',{style:{fontSize:'12px',color:'var(--tx2)',lineHeight:'1.6',marginBottom:'6px'}});d.textContent=desc;main.appendChild(d);}
+  if(subs&&subs.length){
+    const sl=div('wp-substeps');
+    subs.forEach(([sid,stxt])=>{
+      const ss=h('div',{class:'wp-ss',id:'wpss-'+sid,onclick:()=>wpToggleSub(sid)});
+      const sc=h('div',{class:'wp-ss-chk'},'✓');
+      const st=h('span',null);st.innerHTML=stxt;
+      ss.appendChild(sc);ss.appendChild(st);sl.appendChild(ss);
+    });
+    main.appendChild(sl);
+  }
+  if(tool){const t=h('div',{class:'wp-tool'});t.textContent='🔧 '+tool;main.appendChild(t);}
+  if(info){const i=div('wp-info');i.innerHTML='<strong>✅ '+info.split(':')[0]+':</strong> '+info.split(':').slice(1).join(':');main.appendChild(i);}
+  if(warn){const w=div('wp-warn');w.innerHTML='<strong>⚠️ '+warn.split(':')[0]+':</strong> '+warn.split(':').slice(1).join(':');main.appendChild(w);}
+  top.appendChild(chk);top.appendChild(main);step.appendChild(top);
+  return step;
+}
+
+function wpPhase(id,num,bgCol,title,timing,steps_content,badgeStyle){
+  const ph=h('div',{class:'wp-phase',id:'wp'+id});
+  // Header
+  const hdr=h('div',{class:'wp-ph-hdr',onclick:()=>wpTogglePhase(id)});
+  const numEl=h('div',{class:'wp-ph-num',style:{background:bgCol}});numEl.textContent=num;
+  const info=div('wp-ph-info');
+  info.appendChild(h('div',{class:'wp-ph-title'},title));
+  const sub=div('wp-ph-sub');
+  const tm=h('span',{class:'wp-ph-timing'});tm.textContent='⏱ '+timing;sub.appendChild(tm);
+  info.appendChild(sub);
+  const bd=h('span',{class:'wp-ph-badge',style:badgeStyle,id:'wpbd-'+id},'0 / '+WP_STEPS['w'+id].length);
+  const pct=h('span',{class:'wp-ph-pct',id:'wppct-'+id},'0%');
+  const chev=h('span',{class:'wp-ph-chev',id:'wpc-'+id},'▾');
+  hdr.appendChild(numEl);hdr.appendChild(info);hdr.appendChild(bd);hdr.appendChild(pct);hdr.appendChild(chev);
+  ph.appendChild(hdr);
+  // Body
+  const body=h('div',{class:'wp-phase-body',id:'wpb-'+id});
+  // Progress bar
+  const prog=div('wp-ph-prog');
+  prog.appendChild(h('span',{style:{fontSize:'10px',color:'var(--tx2)'}},'Progreso'));
+  const pb=div('wp-ph-pbar');
+  const pf=h('div',{class:'wp-ph-pfill',id:'wpfp-'+id,style:{width:'0%',background:bgCol}});
+  pb.appendChild(pf);prog.appendChild(pb);
+  const pp=h('span',{style:{fontSize:'10px',fontWeight:'600'},id:'wpfpp-'+id},'0%');
+  prog.appendChild(pp);
+  body.appendChild(prog);
+  steps_content.forEach(s=>body.appendChild(s));
+  ph.appendChild(body);
+  return ph;
+}
+
+function renderWorkPlan(app,all){
+  const obs=all.filter(e=>e.ob==='si');
+  const byR=r=>all.filter(e=>rv(e.cr,e.es)===r);
+  const rojos=byR('rojo');
+
+  // Header
+  const hdr=h('div',{class:'wp-hdr'});
+  hdr.appendChild(h('div',{class:'wp-eye'},'Jefatura Nacional de Mantenimiento — ACL'));
+  hdr.appendChild(h('h2',null,'Plan de Trabajo — Gestión de Obsolescencia Electrónica'));
+  hdr.appendChild(h('p',{style:{fontSize:'13px',color:'rgba(255,255,255,.65)'}},'Arca Continental Lindley · 6 plantas · Perú · Julio – Diciembre 2026'));
+  const meta=div('wp-meta');
+  meta.appendChild(h('span',null,'Responsable: ',h('strong',null,'Edwin Ampuero')));
+  meta.appendChild(h('span',null,'Aprueba: ',h('strong',null,'Fernando Soca')));
+  meta.appendChild(h('span',null,'Actualizado: ',h('strong',null,'21 julio 2026')));
+  hdr.appendChild(meta);
+  app.appendChild(hdr);
+
+  // Print button
+  app.appendChild(h('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'14px'}},
+    h('button',{style:{background:'var(--ac)',color:'#fff',border:'none',borderRadius:'7px',padding:'7px 14px',fontSize:'12px',cursor:'pointer',fontWeight:'500'},onclick:()=>window.print()},'🖨️ Imprimir / Guardar PDF')
+  ));
+
+  // KPIs diagnóstico
+  const krow=div('wp-kpi-row');
+  [['5,663','Total equipos','var(--tx)'],['1,670','Obsoletos','#854f0b'],['927','Discontinued','#a32d2d'],['418','Phaseout','#854f0b'],['916','Sin stock','#a32d2d'],['754','Con stock','#3b6d11']].forEach(([v,l,c])=>{
+    const k=div('wp-kpi');
+    const kv=h('div',{class:'wp-kv',style:{color:c}});kv.textContent=v;
+    const kl=h('div',{class:'wp-kl'});kl.textContent=l;
+    k.appendChild(kv);k.appendChild(kl);krow.appendChild(k);
+  });
+  app.appendChild(krow);
+
+  // Global progress
+  const pg=div('wp-prog-global');
+  const pgHdr=h('div',{style:{fontSize:'12px',fontWeight:'600',marginBottom:'10px',display:'flex',justifyContent:'space-between'}},
+    h('span',null,'Progreso general del plan'),
+    h('span',{style:{color:'var(--ac)',fontWeight:'700'},id:'wp-gpct'},'0%')
+  );
+  pg.appendChild(pgHdr);
+  const pmRow=div('wp-phases-row');
+  [['wf1','1','#eaf3de','#3b6d11','Fase 1','Inventario'],['wf2','2','#ddeeff','#0c3d72','Fase 2','Diagnóstico'],['wf3','3','#faeeda','#854f0b','Fase 3','Base de datos'],['wf4','4','#f3e8ff','#7e22ce','Fase 4','Plan de acción']].forEach(([id,n,bg,tx,lbl,sub])=>{
+    const pm=h('div',{class:'wp-phase-mini',style:{background:bg,borderColor:tx},onclick:()=>{const el=document.getElementById('wp'+id.replace('w',''));if(el){el.scrollIntoView({behavior:'smooth',block:'start'});if(!document.getElementById('wpb-'+id.replace('w','')).classList.contains('open'))wpTogglePhase(id.replace('w',''));}}});
+    const pn=h('div',{class:'pm-n',style:{color:tx},id:'wppm-'+id});pn.textContent='0%';
+    const pl=h('div',{class:'pm-l',style:{color:tx}});pl.textContent=lbl;
+    const ps=h('div',{class:'pm-s',style:{color:tx}});ps.textContent=sub;
+    pm.appendChild(pn);pm.appendChild(pl);pm.appendChild(ps);pmRow.appendChild(pm);
+  });
+  pg.appendChild(pmRow);
+  const pb=div('wp-prog-bar');
+  const pf=h('div',{class:'wp-prog-fill',id:'wp-gbar',style:{width:'0%'}});
+  pb.appendChild(pf);pg.appendChild(pb);
+  app.appendChild(pg);
+
+  // ── FASE 1 ──
+  app.appendChild(wpPhase('f1','1','#4ade80',
+    'Fase 1 — Inventario: saber qué tienes','Semanas 1–3',
+    [
+      wpStep('w1-1','Listar todas las plantas y líneas de producción',[['Inicio','g'],''],null,'Edwin + Jefes planta',
+        [['w1-1-1','Confirmar las 6 plantas con sus códigos: Pucusana (1040) · Trujillo (5040) · Zárate (2000) · Arequipa (7000) · Cuzco (7010) · Iquitos (6300)'],
+         ['w1-1-2','Levantar número de líneas de producción por planta con cada jefe de mantenimiento'],
+         ['w1-1-3','Definir áreas a cubrir: Tableros eléctricos · Paneles de control · Sala de instrumentación · SCADA'],
+         ['w1-1-4','Crear Excel base: Planta | Centro | Línea | Área | Denominación U.T.']],
+        'ACL ya tiene esto en el sistema: 5,663 equipos en Pucusana (3,926) · Trujillo (984) · Zárate (304) · Arequipa (236) · Cuzco (119) · Iquitos (94)',null,'Excel ACL + Sistema web'),
+
+      wpStep('w1-2','Levantar inventario de equipos electrónicos por planta',[],null,'Edwin + Ghersi + Técnicos',
+        [['w1-2-1','Registrar: Tipo de componente | Marca | Modelo | Código parte (MLFB) | N° SAP Montaje | N° SAP Componente'],
+         ['w1-2-2','Capturar: Familia | Código Obsolescencia | Cantidad | N° de serie | Año de fabricación/instalación'],
+         ['w1-2-3','Registrar SAP MORTIZ y descripción MORTIZ para equipos con mantenimiento mayor'],
+         ['w1-2-4','Verificar stock físico en almacén por planta y cruzar con SAP'],
+         ['w1-2-5','Consolidar en Excel unificado (33 campos del formato ACL) y cargar al sistema web']],
+        null,
+        'Acción pendiente: Verificar cobertura 100% de líneas. Ghersi Chang tiene 300 equipos con responsable asignado.',
+        'Celular/tablet para fotos + Excel ACL + Sistema web'),
+
+      wpStep('w1-3','Priorizar equipos críticos (no todo es igual',[['Decisión clave','o']],null,'Meliza + Edwin',
+        [['w1-3-1','<strong>Alta:</strong> para la línea si falla · <strong>Media:</strong> afecta calidad/eficiencia · <strong>Baja:</strong> redundante o no crítico'],
+         ['w1-3-2','Asignar Prioridad de Migración: Urgente | Alta | Media | Baja a cada equipo obsoleto'],
+         ['w1-3-3','Verificar si hay repuesto en almacén SAP para cada equipo crítico — define el nivel de exposición real']],
+        'Estado actual ACL: 927 Urgente (Discontinued) · 418 Alta (Phaseout) · 916 obsoletos SIN stock de respaldo',null,null),
+    ],
+    'background:#eaf3de;color:#3b6d11'));
+
+  // ── FASE 2 ──
+  app.appendChild(wpPhase('f2','2','#4a9eff',
+    'Fase 2 — Diagnóstico: clasificar el estado de cada equipo','Semanas 4–6',
+    [
+      wpStep('w2-1','Crear cuenta en SIOS y mySupport',[['Gratis','g']],null,'Edwin',
+        [['w2-1-1','Ir a <strong>support.industry.siemens.com</strong> → Register con email corporativo ACL'],
+         ['w2-1-2','Activar mySupport → agregar todos los equipos Siemens del inventario a la lista de seguimiento'],
+         ['w2-1-3','Configurar notificaciones por email para cambios de estado de ciclo de vida'],
+         ['w2-1-4','Para otros fabricantes: Rockwell → rockwellautomation.com · Schneider → se.com/productlifecycle · ABB → new.abb.com']],
+        null,null,'Portal: support.industry.siemens.com'),
+
+      wpStep('w2-2','Consultar estado de ciclo de vida de cada equipo en SIOS',[],null,'Ghersi + Edwin',
+        [['w2-2-1','Buscar cada MLFB en SIOS → obtener estado: <span style="color:#3b6d11;font-weight:600">Active</span> | <span style="color:#185fa5;font-weight:600">Classic</span> | <span style="color:#854f0b;font-weight:600">Phaseout</span> | <span style="color:#a32d2d;font-weight:600">Discontinued</span>'],
+         ['w2-2-2','Registrar: fecha fin de soporte + producto de reemplazo sugerido por fabricante (campo "Cambio Sugerido")'],
+         ['w2-2-3','Guardar URL de la página SIOS de cada equipo en el campo "Respaldo" (trazabilidad y auditorías)'],
+         ['w2-2-4','Priorizar consulta: primero los 927 Urgente, luego 418 Alta, luego Media y Baja'],
+         ['w2-2-5','Actualizar campo "Obsoleto?" y "Prioridad Migración" en el Excel y recargar al sistema web']],
+        null,
+        'Acción inmediata esta semana: Los 927 Discontinued ya están identificados. Verificar en SIOS el "Cambio Sugerido" para los críticos de Pucusana (360 eq.) y Trujillo (90 eq.)',null),
+
+      wpStep('w2-3','Construir la matriz de riesgo de obsolescencia',[],null,'Edwin + Meliza',
+        [['w2-3-1','<strong>🔴 Crítico urgente</strong> = Discontinued + Alta → 927 equipos → Acción esta semana'],
+         ['w2-3-2','<strong>🟠 Alto riesgo</strong> = Phaseout + Alta/Media → 418 equipos → Plan en 12 meses'],
+         ['w2-3-3','<strong>🟡 Riesgo medio</strong> = Classic o Phaseout + Baja → 325 equipos → Monitorear'],
+         ['w2-3-4','Presentar matriz a Fernando Soca con los números reales de ACL para gestión de presupuesto']],
+        'El sistema web ya lo hace automáticamente: La pestaña "Matriz" muestra el cruce en tiempo real. Cada celda es clickeable y filtra el inventario.',null,null),
+    ],
+    'background:#ddeeff;color:#0c3d72'));
+
+  // ── FASE 3 ──
+  app.appendChild(wpPhase('f3','3','#ef9f27',
+    'Fase 3 — Base de datos: centralizar la información','Semanas 7–10',
+    [
+      wpStep('w3-1','Decidir dónde vivirá tu base de datos',[['Decisión clave','o']],null,'Edwin + Fernando',
+        [['w3-1-1','<strong>Solución actual (implementada):</strong> Excel mensual + Sistema web ACL (GitHub Pages) como visualización y gestión'],
+         ['w3-1-2','<strong>Solución futura (Fase 4):</strong> Integrar con SAP PM → clase de características "Obsolescencia" con campos Estado CV, Fin soporte, Reemplazo'],
+         ['w3-1-3','Definir responsable de actualización mensual del Excel y carga al sistema web (propuesta: Kevin Silva)']],
+        'Decisión tomada: Sistema web ACL en GitHub Pages + Excel unificado mensual. Sin costo de infraestructura.',null,null),
+
+      wpStep('w3-2','Estructurar la base de datos maestra',[],null,'Edwin + Kevin',
+        [['w3-2-1','Completar campo <strong>Responsable</strong> para todos los equipos (actualmente solo 300 de 5,663 = 5%)'],
+         ['w3-2-2','Completar campo <strong>Fecha de actualización</strong> para todos los registros (actualmente solo 15 tienen fecha)'],
+         ['w3-2-3','Completar <strong>Monto estimado de reemplazo</strong> para los 927 Discontinued (gestión presupuestal)'],
+         ['w3-2-4','Completar <strong>Comentario de obsolescencia</strong> para los equipos sin notas'],
+         ['w3-2-5','Rutina mensual: actualizar Excel primer lunes de cada mes → cargar nuevo index.html al sistema web']],
+        null,
+        'Campos críticos incompletos: Responsable: solo 5% completo · Monto estimado: solo 2 de 1,670 · Fecha actualización: solo 15 registros',null),
+
+      wpStep('w3-3','Conectar mySupport para actualizaciones automáticas',[['Gratis','g']],null,'Edwin',
+        [['w3-3-1','Agregar todos los MLFB Siemens a la lista de seguimiento de mySupport (empezar por los 927 Urgente)'],
+         ['w3-3-2','Cuando llegue alerta mySupport → actualizar Estado CV en el Excel → recargar al sistema web'],
+         ['w3-3-3','Futuro (Fase 4): Power Automate → email mySupport actualiza automáticamente SharePoint/SAP']],
+        null,null,'Portal: support.industry.siemens.com/My/'),
+    ],
+    'background:#faeeda;color:#854f0b'));
+
+  // ── FASE 4 ──
+  app.appendChild(wpPhase('f4','4','#a855f7',
+    'Fase 4 — Plan de acción: atacar los rojos y naranjas','Mes 3 en adelante',
+    [
+      wpStep('w4-1','Generar plan de migración por prioridad',[['Urgente','r']],null,'Edwin + Kevin',
+        [['w4-1-1','Filtrar en el sistema web: <strong>🔴 Críticos + sin stock</strong> → máxima urgencia (filtro "Sin stock ❌" + riesgo "Crítico")'],
+         ['w4-1-2','Para cada equipo crítico: definir reemplazo exacto (referencia técnica del fabricante) y conseguir cotización'],
+         ['w4-1-3','Usar TIA Migration Tool para S7-300/400 → evaluar esfuerzo de migración a TIA Portal S7-1500 antes de comprometer fecha'],
+         ['w4-1-4','Asignar en el sistema web: Responsable ACL + Fecha migración planificada + Notas para cada equipo del plan']],
+        null,'Prioridad máxima: Pucusana con 360 críticos sin stock. Iniciar plan esta semana con Ghersi.',null),
+
+      wpStep('w4-2','Gestión de compras urgente — 916 sin stock',[['Urgente','r']],null,'Miguel MRO + Compras',
+        [['w4-2-1','Exportar lista de 916 equipos sin stock desde el sistema web (filtro "Obs. sin stock ❌") → enviar a Compras con código SAP y costo estimado'],
+         ['w4-2-2','Priorizar compras: Lote 1 → 360 sin stock Pucusana · Lote 2 → 90 Trujillo · Lote 3 → resto de plantas'],
+         ['w4-2-3','Para equipos Discontinued: evaluar si comprar repuesto original (last-time-buy) o directamente el equipo de reemplazo'],
+         ['w4-2-4','Actualizar "Stock fisico Almacen" y "Disponibilidad final" en el Excel al recibir cada compra']],
+        null,null,null),
+
+      wpStep('w4-3','Ejecutar migraciones en paradas programadas',[],null,'Ghersi + Edwin + Técnicos planta',
+        [['w4-3-1','<strong>Pucusana (sep 2026):</strong> PLCs S7-300/400 → S7-1500 · HMIs → WinCC Unified · Coordinar con parada general'],
+         ['w4-3-2','<strong>Trujillo (sep-oct 2026):</strong> 90 equipos críticos · Coordinar con Jefe de Mantenimiento Trujillo'],
+         ['w4-3-3','<strong>Zárate, Arequipa, Cuzco, Iquitos (oct-nov 2026):</strong> Menor volumen — planificar en paradas menores'],
+         ['w4-3-4','Tras cada migración: actualizar "Obsoleto? = No" + "Estado CV = Active" en el Excel + recargar al sistema web']],
+        null,null,'TIA Portal + TIA Migration Tool + Siemens Upgrade Service'),
+
+      wpStep('w4-4','Crear dashboard de seguimiento para Fernando Soca',[],null,'Edwin',
+        [['w4-4-1','Revisión mensual con Fernando: presentar dashboard del sistema web (filtros por planta, KPIs de avance)'],
+         ['w4-4-2','KPIs a reportar: N° migraciones ejecutadas · Reducción de Discontinued · Sin stock resueltos · Presupuesto ejecutado'],
+         ['w4-4-3','Meta diciembre 2026: Discontinued &lt; 200 · Sin stock &lt; 300']],
+        null,null,null),
+
+      wpStep('w4-5','Establecer rutina permanente de mantenimiento del sistema',[],null,'Kevin + Edwin',
+        [['w4-5-1','<strong>Mensual (Kevin):</strong> Revisar alertas mySupport + actualizar Excel + cargar nuevo index.html al sistema web'],
+         ['w4-5-2','<strong>Al instalar equipo nuevo:</strong> agregar al Excel ese mismo día — Jefe de planta notifica a Edwin'],
+         ['w4-5-3','<strong>Trimestral (Edwin):</strong> Revisar avance del plan de migración con cada jefe de planta'],
+         ['w4-5-4','<strong>Anual (Edwin + Fernando):</strong> Auditoría completa + definir plan y presupuesto del siguiente año'],
+         ['w4-5-5','<strong>Futuro — Integrar con Senseye:</strong> cruzar predicción de fallo con riesgo de obsolescencia']],
+        null,null,null),
+    ],
+    'background:#f3e8ff;color:#7e22ce'));
+
+  // Gantt
+  const gc=div('card');
+  gc.style.marginTop='8px';
+  gc.appendChild(h('p',{style:{fontSize:'13px',fontWeight:'600',marginBottom:'10px'}},'📅 Cronograma — Julio a Diciembre 2026'));
+  const gw=div('scroll');
+  const gt=h('table',{class:'wp-gantt'});
+  const gh=h('thead',null,h('tr',null,
+    h('th',{style:{textAlign:'left'}},'Actividad'),
+    ...['Jul 2026','Ago 2026','Sep 2026','Oct 2026','Nov 2026','Dic 2026'].map(m=>h('th',null,m))
+  ));
+  const gd=[
+    ['Fase 1 · Inventario',[{c:'#4ade80',t:'✓ DONE'},[],[],[],[],[]]],
+    ['Fase 2 · Diagnóstico',[{c:'#4a9eff',t:'▌'},{c:'#4a9eff',t:'▌'},[],[],[],[]]],
+    ['Fase 3 · Base de datos',[],[{c:'#ef9f27',t:'▌'},{c:'#ef9f27',t:'▌'},[],[],[]]],
+    ['Fase 4 · Compras urgentes',[],[{c:'#a855f7',t:'▌'},{c:'#a855f7',t:'▌'},[],[],[]]],
+    ['Fase 4 · Migraciones Pucusana+Trujillo',[],[],[{c:'#e24b4a',t:'SEP'},{c:'#e24b4a',t:'OCT'},[],[]]],
+    ['Fase 4 · Zárate, Arequipa, Cuzco, Iquitos',[],[],[],[{c:'#e24b4a',t:'OCT'},{c:'#e24b4a',t:'NOV'},[]]],
+    ['Fase 4 · Senseye + Rutinas',[],[],[],[],[{c:'#a855f7',t:'NOV'},{c:'#a855f7',t:'DIC'}]],
+    ['Revisiones Fernando Soca',[],[{c:'#1760a8',t:'REV 1'},[],[{c:'#1760a8',t:'REV 2'},[],[{c:'#1760a8',t:'ANUAL'}]]]]
+  ];
+  const gb=h('tbody',null,...gd.map(([label,cells])=>
+    h('tr',null,
+      h('td',null,label),
+      ...Array(6).fill(null).map((_,i)=>{
+        const c=cells[i];
+        if(!c||Array.isArray(c))return h('td',null,'');
+        const bar=h('div',{class:'wp-gbar',style:{background:c.c}});bar.textContent=c.t;
+        return h('td',null,bar);
+      })
+    )
+  ));
+  gt.appendChild(gh);gt.appendChild(gb);gw.appendChild(gt);gc.appendChild(gw);
+  app.appendChild(gc);
+
+  app.appendChild(h('p',{style:{fontSize:'11px',color:'var(--tx3)',textAlign:'center',marginTop:'1.5rem',paddingTop:'1rem',borderTop:'0.5px solid var(--bd)'}},'Plan de Trabajo · ACL · Gestión Obsolescencia Electrónica · Julio 2026'));
+
+  // Restore state after render
+  setTimeout(()=>wpRestoreState(),50);
+}
+
 function render(){
   const app=document.getElementById('app');
   app.innerHTML='';
@@ -216,7 +638,7 @@ function render(){
 
   // ── TABS ──
   const tb=h('div',{style:{display:'flex',gap:'6px',marginBottom:'16px',overflowX:'auto',paddingBottom:'2px'}});
-  [['dashboard','📊 Dashboard'],['inventario','📋 Inventario'],['riesgo','⚠️ Matriz'],['plan','🚨 Plan ('+action.length+')']].forEach(([id,label])=>{
+  [['dashboard','📊 Dashboard'],['inventario','📋 Inventario'],['riesgo','⚠️ Matriz'],['plan','🚨 Plan ('+action.length+')'],['planwork','📋 Plan de Trabajo']].forEach(([id,label])=>{
     const t=h('button',{class:'tab'+(activeTab===id?' on':''),onclick:()=>{activeTab=id;page=0;render();}});
     t.textContent=label;tb.appendChild(t);
   });
@@ -537,6 +959,11 @@ function render(){
       app.appendChild(box);
     });
     if(planItems.length>30)app.appendChild(h('p',{style:{fontSize:'12px',color:'var(--tx2)',textAlign:'center',padding:'8px'}},'Mostrando 30 de '+planItems.length+' · Usa el filtro de planta para ver el resto'));
+  }
+
+  // ══ PLAN DE TRABAJO ══
+  if(activeTab==='planwork'){
+    renderWorkPlan(app,all);
   }
 
   if(showDetail)app.appendChild(renderDetail(showDetail));
