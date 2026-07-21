@@ -3,535 +3,565 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Gestión de Obsolescencia — ACL</title>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
+<title>Obsolescencia Electrónica — ACL</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#1a1a18;min-height:100vh}
-  :root{
-    --bg:#f5f4f0;--surface:#ffffff;--surface2:#f9f8f5;
-    --border:#e2e0d8;--border2:#c8c6bc;
-    --text:#1a1a18;--text2:#6b6a64;--text3:#9c9a92;
-    --accent:#185FA5;--accent-bg:#E6F1FB;--accent-text:#0c447c;
-    --success:#3B6D11;--success-bg:#EAF3DE;
-    --radius:8px;--font-mono:'Courier New',monospace;
-  }
-  @media(prefers-color-scheme:dark){
-    :root{
-      --bg:#1c1c1a;--surface:#2a2a27;--surface2:#232320;
-      --border:#3a3a36;--border2:#4a4a45;
-      --text:#e8e6de;--text2:#9c9a92;--text3:#6b6a64;
-      --accent:#5B9FD5;--accent-bg:#0c2440;--accent-text:#85b7eb;
-    }
-  }
-  button{font-family:inherit;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;border-radius:var(--radius);padding:6px 13px;font-size:12px;transition:background .15s}
-  button:hover{background:var(--surface2)}
-  button.primary{background:var(--accent);color:#fff;border:none;font-weight:500}
-  button.primary:hover{opacity:.9}
-  button.danger{color:#A32D2D;border-color:#F7C1C1}
-  input,select,textarea{font-family:inherit;font-size:13px;padding:6px 9px;border-radius:var(--radius);border:0.5px solid var(--border);background:var(--surface2);color:var(--text);width:100%;outline:none;transition:border-color .15s}
-  input:focus,select:focus,textarea:focus{border-color:var(--accent)}
-  label.lbl{font-size:11px;color:var(--text2);margin-bottom:3px;display:block}
-  .card{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:14px}
-  .badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500}
-  table{width:100%;border-collapse:collapse;font-size:12px}
-  th{padding:8px 10px;text-align:left;color:var(--text2);font-weight:500;border-bottom:0.5px solid var(--border);font-size:11px;white-space:nowrap;background:var(--surface2)}
-  td{padding:7px 10px;border-bottom:0.5px solid var(--border);color:var(--text)}
-  .tab{padding:7px 13px;font-size:13px;border-radius:7px;cursor:pointer;border:0.5px solid transparent;white-space:nowrap;font-family:inherit;background:transparent;color:var(--text2)}
-  .tab.active{background:var(--accent-bg);color:var(--accent-text);border-color:var(--accent);font-weight:500}
-  .tab:hover:not(.active){background:var(--surface)}
-  .grid-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
-  .grid-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px}
-  .grid-charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
-  .scroll-x{overflow-x:auto}
-  .mono{font-family:var(--font-mono);font-size:11px}
-  .ai-box{background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:12px;margin-top:8px}
-  .ai-label{font-size:11px;font-weight:500;color:var(--accent-text);margin-bottom:8px}
-  .ai-text{font-size:12px;line-height:1.8;white-space:pre-wrap;color:var(--text)}
-  .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:999}
-  .settings-box{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:24px;width:90%;max-width:420px}
-  @media(max-width:600px){.hide-sm{display:none}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0efe9;color:#1a1a18;min-height:100vh;font-size:14px}
+:root{--bg:#f0efe9;--s1:#ffffff;--s2:#f7f6f2;--bd:#e0ddd4;--bd2:#c5c2b8;--tx:#1a1a18;--tx2:#6b6a64;--tx3:#9c9a92;--ac:#1760a8;--ac-bg:#ddeeff;--ac-tx:#0c3d72;--r:8px}
+@media(prefers-color-scheme:dark){:root{--bg:#1a1a18;--s1:#252521;--s2:#1e1e1b;--bd:#38382f;--bd2:#4a4a40;--tx:#e8e6de;--tx2:#9c9a92;--tx3:#6b6a64;--ac:#5599dd;--ac-bg:#0c2440;--ac-tx:#85bbee}}
+a{color:var(--ac)}
+button{font:inherit;border:0.5px solid var(--bd2);background:transparent;color:var(--tx);cursor:pointer;border-radius:var(--r);padding:6px 13px;font-size:12px;transition:background .15s}
+button:hover{background:var(--s2)}
+button.pri{background:var(--ac);color:#fff;border:none;font-weight:500}
+button.pri:hover{opacity:.88}
+button.del{color:#a32d2d;border-color:#f0b0b0}
+input,select,textarea{font:inherit;font-size:13px;padding:6px 9px;border-radius:var(--r);border:0.5px solid var(--bd);background:var(--s2);color:var(--tx);width:100%;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--ac)}
+.card{background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:8px 10px;text-align:left;color:var(--tx2);font-weight:500;border-bottom:0.5px solid var(--bd);font-size:11px;white-space:nowrap;background:var(--s2)}
+td{padding:7px 10px;border-bottom:0.5px solid var(--bd);color:var(--tx);vertical-align:middle}
+.tab{padding:7px 13px;font-size:13px;border-radius:7px;cursor:pointer;border:0.5px solid transparent;white-space:nowrap;font-family:inherit;background:transparent;color:var(--tx2);transition:all .15s}
+.tab.on{background:var(--ac-bg);color:var(--ac-tx);border-color:var(--ac);font-weight:500}
+.tab:hover:not(.on){background:var(--s1)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.grid-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+.grid-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px}
+.lbl{font-size:11px;color:var(--tx2);margin-bottom:3px;display:block}
+.mono{font-family:'Courier New',monospace;font-size:11px}
+.scroll{overflow-x:auto}
+.bar-wrap{display:flex;flex-direction:column;gap:6px}
+.bar-row{display:flex;align-items:center;gap:8px;font-size:12px}
+.bar-label{width:70px;text-align:right;color:var(--tx2);flex-shrink:0;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:18px;background:var(--s2);border-radius:4px;overflow:hidden;display:flex;gap:1px}
+.bar-fill{height:100%;border-radius:4px;transition:width .4s;min-width:2px}
+.bar-val{width:24px;font-size:11px;color:var(--tx2);flex-shrink:0}
+.pie-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.pie-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--tx2)}
+.pie-dot{width:24px;height:14px;border-radius:3px;flex-shrink:0}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:999;padding:1rem}
+.modal{background:var(--s1);border:0.5px solid var(--bd);border-radius:12px;padding:24px;width:100%;max-width:440px}
+.ai-box{background:var(--s2);border:0.5px solid var(--bd);border-radius:8px;padding:12px;margin-top:8px}
+.risk-table td,.risk-table th{text-align:center;padding:12px 10px;border:0.5px solid var(--bd)}
+.risk-table td:first-child,.risk-table th:first-child{text-align:left;font-weight:500;background:var(--s2)}
 </style>
 </head>
 <body>
-<div id="root"></div>
+<div id="app" style="max-width:1080px;margin:0 auto;padding:1rem"></div>
 
-<script type="text/babel">
-const { useState, useEffect, useRef } = React;
-const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } = Recharts;
+<script>
+// ── Data ──
+const PLANTAS=['Pucusana','Trujillo','Arequipa','Zárate','Cuzco','Iquitos'];
+const ESTADOS=['Sin verificar','Active','Classic','Phaseout','Discontinued'];
+const CRITS=['Alta','Media','Baja'];
+const AREAS=['Control','Eléctrica','Instrumentación','Mecánica','Otros'];
+const SK='acl-obs-v4', AK='acl-api-key';
 
-/* ── Constants ── */
-const PLANTAS     = ["Pucusana","Trujillo","Arequipa","Zárate","Cuzco","Iquitos"];
-const ESTADOS_CV  = ["Sin verificar","Active","Classic","Phaseout","Discontinued"];
-const CRITICIDADES= ["Alta","Media","Baja"];
-const AREAS       = ["Control","Eléctrica","Instrumentación","Mecánica","Otros"];
-const STORAGE_KEY = "acl-obs-v3";
-const API_KEY_KEY = "acl-api-key";
+const RM={
+  Alta:  {Active:'verde',Classic:'amarillo',Phaseout:'naranja',Discontinued:'rojo'},
+  Media: {Active:'verde',Classic:'verde',   Phaseout:'amarillo',Discontinued:'naranja'},
+  Baja:  {Active:'verde',Classic:'verde',   Phaseout:'verde',   Discontinued:'amarillo'},
+};
+const R={
+  rojo:    {label:'Crítico urgente',color:'#e24b4a',bg:'#fcebeb',tx:'#a32d2d',em:'🔴'},
+  naranja: {label:'Alto riesgo',   color:'#ef9f27',bg:'#faeeda',tx:'#854f0b',em:'🟠'},
+  amarillo:{label:'Riesgo medio',  color:'#ba7517',bg:'#fff8e6',tx:'#633806',em:'🟡'},
+  verde:   {label:'Bajo riesgo',   color:'#639922',bg:'#eaf3de',tx:'#3b6d11',em:'🟢'},
+  gris:    {label:'Sin verificar', color:'#888780',bg:'#f1efe8',tx:'#5f5e5a',em:'⚪'},
+};
+const EC={Active:'#3b6d11',Classic:'#185fa5',Phaseout:'#854f0b',Discontinued:'#a32d2d','Sin verificar':'#5f5e5a'};
+const EB={Active:'#eaf3de',Classic:'#e6f1fb',Phaseout:'#faeeda',Discontinued:'#fcebeb','Sin verificar':'#f1efe8'};
+const CB={Alta:['#fcebeb','#a32d2d'],Media:['#faeeda','#854f0b'],Baja:['#eaf3de','#3b6d11']};
 
-function getRiesgo(crit, est) {
-  if (!est || est === "Sin verificar") return "gris";
-  const M = {
-    Alta:  { Active:"verde", Classic:"amarillo", Phaseout:"naranja", Discontinued:"rojo" },
-    Media: { Active:"verde", Classic:"verde",    Phaseout:"amarillo", Discontinued:"naranja" },
-    Baja:  { Active:"verde", Classic:"verde",    Phaseout:"verde",    Discontinued:"amarillo" },
-  };
-  return M[crit]?.[est] ?? "verde";
+function getRiesgo(c,e){
+  if(!e||e==='Sin verificar')return 'gris';
+  return RM[c]?.[e]||'verde';
 }
 
-const R = {
-  rojo:     { label:"Crítico urgente", color:"#E24B4A", bg:"#FCEBEB", text:"#A32D2D", emoji:"🔴" },
-  naranja:  { label:"Alto riesgo",     color:"#EF9F27", bg:"#FAEEDA", text:"#854F0B", emoji:"🟠" },
-  amarillo: { label:"Riesgo medio",    color:"#BA7517", bg:"#FFF8E6", text:"#633806", emoji:"🟡" },
-  verde:    { label:"Bajo riesgo",     color:"#639922", bg:"#EAF3DE", text:"#3B6D11", emoji:"🟢" },
-  gris:     { label:"Sin verificar",   color:"#888780", bg:"#F1EFE8", text:"#5F5E5A", emoji:"⚪" },
-};
-
-const E_COLOR = { Active:"#3B6D11",Classic:"#185FA5",Phaseout:"#854F0B",Discontinued:"#A32D2D","Sin verificar":"#5F5E5A" };
-const E_BG    = { Active:"#EAF3DE",Classic:"#E6F1FB",Phaseout:"#FAEEDA",Discontinued:"#FCEBEB","Sin verificar":"#F1EFE8" };
-
-const SAMPLE = [
-  { id:"1",  planta:"Pucusana", linea:"Línea 1", area:"Control",         fabricante:"Siemens",         modelo:"S7-315",        mlfb:"6ES7315-2EH14-0AB0",  nroSerie:"S-123", anio:"2008", criticidad:"Alta",  estado:"Discontinued", finSoporte:"2023-10", reemplazo:"S7-1500",         repuesto:false, responsable:"Edwin",  fechaMigracion:"2025-06", costo:"12000", notas:"Prioridad máxima — sin repuesto en stock" },
-  { id:"2",  planta:"Pucusana", linea:"Línea 2", area:"Control",         fabricante:"Siemens",         modelo:"S7-400",        mlfb:"6ES7412-2XK07-0AB0",  nroSerie:"S-456", anio:"2010", criticidad:"Alta",  estado:"Phaseout",     finSoporte:"2025-06", reemplazo:"S7-1500 H",       repuesto:false, responsable:"",       fechaMigracion:"",        costo:"25000", notas:"" },
-  { id:"3",  planta:"Trujillo", linea:"Línea 1", area:"Control",         fabricante:"Siemens",         modelo:"S7-1200",       mlfb:"6ES7214-1AG40-0XB0",  nroSerie:"T-789", anio:"2019", criticidad:"Media", estado:"Active",       finSoporte:"",        reemplazo:"",                repuesto:true,  responsable:"",       fechaMigracion:"",        costo:"",      notas:"" },
-  { id:"4",  planta:"Arequipa", linea:"Línea 1", area:"Eléctrica",       fabricante:"Siemens",         modelo:"SINAMICS G120", mlfb:"6SL3224-0BE27-5UA0",  nroSerie:"A-001", anio:"2012", criticidad:"Alta",  estado:"Classic",      finSoporte:"2026-12", reemplazo:"",                repuesto:false, responsable:"",       fechaMigracion:"",        costo:"",      notas:"" },
-  { id:"5",  planta:"Zárate",   linea:"Línea 3", area:"Control",         fabricante:"Allen-Bradley",   modelo:"SLC 500",       mlfb:"1747-L541",           nroSerie:"Z-222", anio:"2005", criticidad:"Alta",  estado:"Discontinued", finSoporte:"2019-01", reemplazo:"ControlLogix 5580",repuesto:false, responsable:"Ghersi", fechaMigracion:"2025-09", costo:"18000", notas:"Coordinar con Rockwell Automation" },
-  { id:"6",  planta:"Cuzco",    linea:"Línea 1", area:"Instrumentación",  fabricante:"Siemens",         modelo:"SITRANS F",     mlfb:"7ME6520-1EA13-2AA1",  nroSerie:"C-111", anio:"2015", criticidad:"Media", estado:"Active",       finSoporte:"",        reemplazo:"",                repuesto:true,  responsable:"",       fechaMigracion:"",        costo:"",      notas:"" },
-  { id:"7",  planta:"Iquitos",  linea:"Línea 1", area:"Control",         fabricante:"Schneider",       modelo:"Modicon M340",  mlfb:"BMX P34 2020",        nroSerie:"I-333", anio:"2011", criticidad:"Media", estado:"Phaseout",     finSoporte:"2025-03", reemplazo:"Modicon M580",    repuesto:false, responsable:"",       fechaMigracion:"",        costo:"",      notas:"" },
-  { id:"8",  planta:"Trujillo", linea:"Línea 2", area:"Eléctrica",       fabricante:"ABB",             modelo:"ACS550",        mlfb:"ACS550-01-046A-4",    nroSerie:"T-002", anio:"2009", criticidad:"Baja",  estado:"Discontinued", finSoporte:"2020-12", reemplazo:"ACS580",          repuesto:true,  responsable:"",       fechaMigracion:"",        costo:"3500",  notas:"1 repuesto en stock" },
-  { id:"9",  planta:"Zárate",   linea:"Línea 1", area:"Control",         fabricante:"Siemens",         modelo:"S7-1500",       mlfb:"6ES7516-3AN02-0AB0",  nroSerie:"Z-003", anio:"2022", criticidad:"Alta",  estado:"Active",       finSoporte:"",        reemplazo:"",                repuesto:false, responsable:"",       fechaMigracion:"",        costo:"",      notas:"Instalado 2022" },
-  { id:"10", planta:"Arequipa", linea:"Línea 2", area:"Instrumentación",  fabricante:"Endress+Hauser", modelo:"Promag 53W",    mlfb:"53W15-AB1A1AA0AAAA",  nroSerie:"A-020", anio:"2014", criticidad:"Media", estado:"Classic",      finSoporte:"2027-06", reemplazo:"Promag 10W",     repuesto:false, responsable:"",       fechaMigracion:"",        costo:"",      notas:"" },
-  { id:"11", planta:"Cuzco",    linea:"Línea 2", area:"Control",         fabricante:"Siemens",         modelo:"WinCC flexible",mlfb:"6AV6648-0CC11-3AX0",  nroSerie:"C-005", anio:"2010", criticidad:"Alta",  estado:"Discontinued", finSoporte:"2018-06", reemplazo:"WinCC Unified",   repuesto:false, responsable:"",       fechaMigracion:"",        costo:"8000",  notas:"HMI sin soporte — riesgo alto" },
-  { id:"12", planta:"Pucusana", linea:"Línea 3", area:"Eléctrica",       fabricante:"Siemens",         modelo:"SINAMICS S120", mlfb:"6SL3130-6TE21-6AA3",  nroSerie:"P-010", anio:"2016", criticidad:"Media", estado:"Active",       finSoporte:"",        reemplazo:"",                repuesto:false, responsable:"",       fechaMigracion:"",        costo:"",      notas:"" },
+const SAMPLE=[
+  {id:'1',planta:'Pucusana',linea:'Línea 1',area:'Control',fabricante:'Siemens',modelo:'S7-315',mlfb:'6ES7315-2EH14-0AB0',nroSerie:'S-123',anio:'2008',criticidad:'Alta',estado:'Discontinued',finSoporte:'2023-10',reemplazo:'S7-1500',repuesto:false,responsable:'Edwin',fechaMigracion:'2025-06',costo:'12000',notas:'Prioridad máxima — sin repuesto en stock'},
+  {id:'2',planta:'Pucusana',linea:'Línea 2',area:'Control',fabricante:'Siemens',modelo:'S7-400',mlfb:'6ES7412-2XK07-0AB0',nroSerie:'S-456',anio:'2010',criticidad:'Alta',estado:'Phaseout',finSoporte:'2025-06',reemplazo:'S7-1500 H',repuesto:false,responsable:'',fechaMigracion:'',costo:'25000',notas:''},
+  {id:'3',planta:'Trujillo',linea:'Línea 1',area:'Control',fabricante:'Siemens',modelo:'S7-1200',mlfb:'6ES7214-1AG40-0XB0',nroSerie:'T-789',anio:'2019',criticidad:'Media',estado:'Active',finSoporte:'',reemplazo:'',repuesto:true,responsable:'',fechaMigracion:'',costo:'',notas:''},
+  {id:'4',planta:'Arequipa',linea:'Línea 1',area:'Eléctrica',fabricante:'Siemens',modelo:'SINAMICS G120',mlfb:'6SL3224-0BE27-5UA0',nroSerie:'A-001',anio:'2012',criticidad:'Alta',estado:'Classic',finSoporte:'2026-12',reemplazo:'',repuesto:false,responsable:'',fechaMigracion:'',costo:'',notas:''},
+  {id:'5',planta:'Zárate',linea:'Línea 3',area:'Control',fabricante:'Allen-Bradley',modelo:'SLC 500',mlfb:'1747-L541',nroSerie:'Z-222',anio:'2005',criticidad:'Alta',estado:'Discontinued',finSoporte:'2019-01',reemplazo:'ControlLogix 5580',repuesto:false,responsable:'Ghersi',fechaMigracion:'2025-09',costo:'18000',notas:'Coordinar con Rockwell'},
+  {id:'6',planta:'Cuzco',linea:'Línea 1',area:'Instrumentación',fabricante:'Siemens',modelo:'SITRANS F',mlfb:'7ME6520-1EA13-2AA1',nroSerie:'C-111',anio:'2015',criticidad:'Media',estado:'Active',finSoporte:'',reemplazo:'',repuesto:true,responsable:'',fechaMigracion:'',costo:'',notas:''},
+  {id:'7',planta:'Iquitos',linea:'Línea 1',area:'Control',fabricante:'Schneider',modelo:'Modicon M340',mlfb:'BMX P34 2020',nroSerie:'I-333',anio:'2011',criticidad:'Media',estado:'Phaseout',finSoporte:'2025-03',reemplazo:'Modicon M580',repuesto:false,responsable:'',fechaMigracion:'',costo:'',notas:''},
+  {id:'8',planta:'Trujillo',linea:'Línea 2',area:'Eléctrica',fabricante:'ABB',modelo:'ACS550',mlfb:'ACS550-01-046A-4',nroSerie:'T-002',anio:'2009',criticidad:'Baja',estado:'Discontinued',finSoporte:'2020-12',reemplazo:'ACS580',repuesto:true,responsable:'',fechaMigracion:'',costo:'3500',notas:'1 repuesto en stock'},
+  {id:'9',planta:'Zárate',linea:'Línea 1',area:'Control',fabricante:'Siemens',modelo:'S7-1500',mlfb:'6ES7516-3AN02-0AB0',nroSerie:'Z-003',anio:'2022',criticidad:'Alta',estado:'Active',finSoporte:'',reemplazo:'',repuesto:false,responsable:'',fechaMigracion:'',costo:'',notas:''},
+  {id:'10',planta:'Arequipa',linea:'Línea 2',area:'Instrumentación',fabricante:'Endress+Hauser',modelo:'Promag 53W',mlfb:'53W15-AB1A1AA0AAAA',nroSerie:'A-020',anio:'2014',criticidad:'Media',estado:'Classic',finSoporte:'2027-06',reemplazo:'Promag 10W',repuesto:false,responsable:'',fechaMigracion:'',costo:'',notas:''},
+  {id:'11',planta:'Cuzco',linea:'Línea 2',area:'Control',fabricante:'Siemens',modelo:'WinCC flexible',mlfb:'6AV6648-0CC11-3AX0',nroSerie:'C-005',anio:'2010',criticidad:'Alta',estado:'Discontinued',finSoporte:'2018-06',reemplazo:'WinCC Unified',repuesto:false,responsable:'',fechaMigracion:'',costo:'8000',notas:'HMI sin soporte — riesgo alto'},
+  {id:'12',planta:'Pucusana',linea:'Línea 3',area:'Eléctrica',fabricante:'Siemens',modelo:'SINAMICS S120',mlfb:'6SL3130-6TE21-6AA3',nroSerie:'P-010',anio:'2016',criticidad:'Media',estado:'Active',finSoporte:'',reemplazo:'',repuesto:false,responsable:'',fechaMigracion:'',costo:'',notas:''},
 ];
 
-const EMPTY = { planta:"Pucusana",linea:"",area:"Control",fabricante:"Siemens",modelo:"",mlfb:"",nroSerie:"",anio:"",criticidad:"Alta",estado:"Sin verificar",finSoporte:"",reemplazo:"",repuesto:false,responsable:"",fechaMigracion:"",costo:"",notas:"" };
+// ── State ──
+let equipos=[], activeTab='dashboard', showForm=false, formData={}, showSettings=false;
+let filters={planta:'',estado:'',crit:'',q:''}, apiKey='', aiState={};
 
-/* ── Small components ── */
-const Badge  = ({r}) => { const rc=R[r]||R.gris; return <span className="badge" style={{background:rc.bg,color:rc.text}}>{rc.emoji} {rc.label}</span>; };
-const EBadge = ({e}) => <span className="badge" style={{background:E_BG[e]||"#F1EFE8",color:E_COLOR[e]||"#5F5E5A"}}>{e}</span>;
-const CBadge = ({c}) => { const m={Alta:["#FCEBEB","#A32D2D"],Media:["#FAEEDA","#854F0B"],Baja:["#EAF3DE","#3B6D11"]}[c]||["#F1EFE8","#5F5E5A"]; return <span className="badge" style={{background:m[0],color:m[1]}}>{c}</span>; };
+function load(){
+  try{const s=localStorage.getItem(SK); equipos=s?JSON.parse(s):JSON.parse(JSON.stringify(SAMPLE));}
+  catch{equipos=JSON.parse(JSON.stringify(SAMPLE));}
+  if(!localStorage.getItem(SK)) localStorage.setItem(SK,JSON.stringify(equipos));
+  apiKey=localStorage.getItem(AK)||'';
+}
 
-/* ── Main App ── */
-function App() {
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [equipos,   setEquipos]   = useState([]);
-  const [ready,     setReady]     = useState(false);
-  const [showForm,  setShowForm]  = useState(false);
-  const [form,      setForm]      = useState(EMPTY);
-  const [filters,   setFilters]   = useState({planta:"",estado:"",crit:"",q:""});
-  const [ai,        setAi]        = useState({});
-  const [showSettings, setShowSettings] = useState(false);
-  const [apiKey,    setApiKey]    = useState("");
-  const [apiKeyInput, setApiKeyInput] = useState("");
+function persist(){localStorage.setItem(SK,JSON.stringify(equipos));}
 
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    setEquipos(saved ? JSON.parse(saved) : SAMPLE);
-    if (!saved) localStorage.setItem(STORAGE_KEY, JSON.stringify(SAMPLE));
-    const key = localStorage.getItem(API_KEY_KEY) || "";
-    setApiKey(key);
-    setApiKeyInput(key);
-    setReady(true);
-  }, []);
-
-  const persist = (data) => { setEquipos(data); localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); };
-  const setF    = (k,v)  => setForm(p => ({...p,[k]:v}));
-  const openAdd  = () => { setForm({...EMPTY}); setShowForm(true); };
-  const openEdit = (e) => { setForm({...e}); setShowForm(true); };
-  const delItem  = (id) => { if (window.confirm("¿Eliminar este equipo del inventario?")) persist(equipos.filter(e=>e.id!==id)); };
-  const saveForm = () => {
-    persist(form.id ? equipos.map(e=>e.id===form.id?form:e) : [...equipos,{...form,id:Date.now().toString()}]);
-    setShowForm(false);
-  };
-  const saveApiKey = () => { localStorage.setItem(API_KEY_KEY, apiKeyInput); setApiKey(apiKeyInput); setShowSettings(false); };
-
-  const getAiRec = async (eq) => {
-    if (!apiKey) { setShowSettings(true); return; }
-    setAi(p=>({...p,[eq.id]:{loading:true,text:""}}));
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method:"POST",
-        headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-        body: JSON.stringify({
-          model:"claude-sonnet-4-6", max_tokens:1000,
-          messages:[{role:"user",content:`Soy especialista en automatización de Arca Continental Lindley (embotelladora Coca-Cola, Perú, 6 plantas). Equipo con obsolescencia:
-
-Planta: ${eq.planta} | Línea: ${eq.linea} | Área: ${eq.area}
-Fabricante/Modelo: ${eq.fabricante} ${eq.modelo} (${eq.mlfb})
-Criticidad: ${eq.criticidad} | Estado SIOS: ${eq.estado}
-Fin soporte: ${eq.finSoporte||"N/D"} | Reemplazo sugerido: ${eq.reemplazo||"No definido"}
-Repuesto en almacén: ${eq.repuesto?"Sí":"No"} | Notas: ${eq.notas||"Ninguna"}
-
-Dame un plan de acción con exactamente 5 puntos:
-1. Acción inmediata esta semana
-2. Alternativa de reemplazo específica (referencia técnica)
-3. Riesgo operacional si no se actúa en 3 meses
-4. Estrategia de migración para planta embotelladora
-5. Tiempo estimado y coordinación necesaria
-
-Solo los 5 puntos numerados, directo, en español.`}]
-        })
-      });
-      const d = await res.json();
-      const text = d.content?.map(c=>c.text||"").join("") || (d.error?.message || "Sin respuesta.");
-      setAi(p=>({...p,[eq.id]:{loading:false,text}}));
-    } catch(err) {
-      setAi(p=>({...p,[eq.id]:{loading:false,text:"Error de conexión: " + err.message}}));
-    }
-  };
-
-  if (!ready) return <div style={{padding:"3rem",textAlign:"center",color:"var(--text2)"}}>Cargando...</div>;
-
-  /* ── Derived ── */
-  const byR    = (r) => equipos.filter(e=>getRiesgo(e.criticidad,e.estado)===r);
-  const rojos  = byR("rojo"), naranjas = byR("naranja");
-  const sinVer = equipos.filter(e=>!e.estado||e.estado==="Sin verificar");
-  const disc   = equipos.filter(e=>e.estado==="Discontinued");
-  const action = [...rojos,...naranjas];
-
-  const filtered = equipos.filter(e => {
-    const {planta,estado,crit,q} = filters;
-    if (planta && e.planta!==planta) return false;
-    if (estado && e.estado!==estado) return false;
-    if (crit && e.criticidad!==crit) return false;
-    if (q && !`${e.fabricante} ${e.modelo} ${e.mlfb} ${e.planta} ${e.linea}`.toLowerCase().includes(q.toLowerCase())) return false;
-    return true;
+// ── Helpers ──
+function h(tag,attrs,...children){
+  const el=document.createElement(tag);
+  if(attrs) Object.entries(attrs).forEach(([k,v])=>{
+    if(k==='class') el.className=v;
+    else if(k==='style'&&typeof v==='object') Object.assign(el.style,v);
+    else if(k.startsWith('on')) el.addEventListener(k.slice(2).toLowerCase(),v);
+    else if(k==='checked'&&tag==='input') el.checked=v;
+    else if(k==='value'&&(tag==='input'||tag==='select'||tag==='textarea')) el.value=v||'';
+    else if(k==='disabled') el.disabled=v;
+    else el.setAttribute(k,v);
   });
-
-  const chartPlanta = PLANTAS.map(p=>({
-    name:p.length>6?p.slice(0,6):p, full:p,
-    total:equipos.filter(e=>e.planta===p).length,
-    riesgo:equipos.filter(e=>e.planta===p&&["rojo","naranja"].includes(getRiesgo(e.criticidad,e.estado))).length,
-  })).filter(p=>p.total>0);
-
-  const chartEst = [
-    {name:"Active",       value:equipos.filter(e=>e.estado==="Active").length,       fill:"#639922"},
-    {name:"Classic",      value:equipos.filter(e=>e.estado==="Classic").length,      fill:"#378ADD"},
-    {name:"Phaseout",     value:equipos.filter(e=>e.estado==="Phaseout").length,     fill:"#EF9F27"},
-    {name:"Discontinued", value:equipos.filter(e=>e.estado==="Discontinued").length, fill:"#E24B4A"},
-    {name:"Sin verif.",   value:sinVer.length,                                        fill:"#888780"},
-  ].filter(d=>d.value>0);
-
-  const PHASES = [
-    {n:1, label:"Inventario",   done:equipos.length>0},
-    {n:2, label:"Diagnóstico",  done:equipos.some(e=>e.estado!=="Sin verificar")},
-    {n:3, label:"Base de datos",done:equipos.length>=SAMPLE.length},
-    {n:4, label:"Plan de acción",done:action.some(e=>e.responsable||e.fechaMigracion)},
-  ];
-
-  /* ── Render ── */
-  return (
-    <div style={{maxWidth:1100,margin:"0 auto",padding:"1rem"}}>
-
-      {/* Header */}
-      <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:10,marginBottom:16}}>
-        <div>
-          <h1 style={{fontSize:17,fontWeight:600,color:"var(--text)",marginBottom:2}}>Gestión de Obsolescencia Electrónica</h1>
-          <p style={{fontSize:12,color:"var(--text2)"}}>Arca Continental Lindley · {equipos.length} equipos · 6 plantas</p>
-        </div>
-        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
-          <div style={{display:"flex",gap:6,alignItems:"center"}}>
-            {PHASES.map(p=>(
-              <div key={p.n} title={"Fase "+p.n+": "+p.label} style={{width:24,height:24,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:600,background:p.done?"var(--accent)":"var(--border)",color:p.done?"#fff":"var(--text3)",cursor:"default"}}>{p.done?"✓":p.n}</div>
-            ))}
-            <span style={{fontSize:11,color:"var(--text2)"}}>fases</span>
-          </div>
-          <button onClick={()=>{setApiKeyInput(apiKey);setShowSettings(true)}} style={{fontSize:11,padding:"4px 10px"}} title="Configurar API key para IA">⚙️ IA {apiKey?"✅":"❌"}</button>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div style={{display:"flex",gap:6,marginBottom:18,overflowX:"auto",paddingBottom:4}}>
-        {[["dashboard","📊 Dashboard"],["inventario","📋 Inventario"],["riesgo","⚠️ Matriz de riesgo"],["plan","🚨 Plan de acción"]].map(([id,label])=>(
-          <button key={id} className={`tab${activeTab===id?" active":""}`} onClick={()=>setActiveTab(id)}>{label}</button>
-        ))}
-      </div>
-
-      {/* ══ DASHBOARD ══ */}
-      {activeTab==="dashboard" && <>
-        <div className="grid-kpi" style={{marginBottom:18}}>
-          {[
-            {label:"Total equipos",  v:equipos.length, bg:"var(--surface)",  tc:"var(--text)", lc:"var(--text2)"},
-            {label:"🔴 Críticos",     v:rojos.length,   bg:"#FCEBEB",         tc:"#A32D2D",     lc:"#C04040"},
-            {label:"🟠 Alto riesgo",  v:naranjas.length, bg:"#FAEEDA",         tc:"#854F0B",     lc:"#A06010"},
-            {label:"⚪ Sin verificar", v:sinVer.length,  bg:"#F1EFE8",         tc:"#5F5E5A",     lc:"#888780"},
-            {label:"Discontinued",   v:disc.length,    bg:"#FCEBEB",         tc:"#A32D2D",     lc:"#C04040"},
-          ].map(k=>(
-            <div key={k.label} style={{background:k.bg,border:"0.5px solid var(--border)",borderRadius:10,padding:"12px 14px"}}>
-              <div style={{fontSize:11,color:k.lc,marginBottom:4}}>{k.label}</div>
-              <div style={{fontSize:28,fontWeight:600,color:k.tc,lineHeight:1}}>{k.v}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="grid-charts" style={{marginBottom:18}}>
-          <div className="card">
-            <p style={{fontSize:13,fontWeight:500,marginBottom:10}}>Equipos por planta</p>
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={chartPlanta} barSize={16} barGap={2}>
-                <XAxis dataKey="name" tick={{fontSize:10,fill:"var(--text2)"}}/>
-                <YAxis tick={{fontSize:10,fill:"var(--text2)"}}/>
-                <Tooltip formatter={(v,n)=>[v,n]} contentStyle={{fontSize:12,borderRadius:6}}/>
-                <Bar dataKey="total"  fill="#378ADD" name="Total"    radius={[3,3,0,0]}/>
-                <Bar dataKey="riesgo" fill="#E24B4A" name="En riesgo" radius={[3,3,0,0]}/>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="card">
-            <p style={{fontSize:13,fontWeight:500,marginBottom:10}}>Estado ciclo de vida</p>
-            <ResponsiveContainer width="100%" height={160}>
-              <PieChart>
-                <Pie data={chartEst} dataKey="value" cx="40%" cy="50%" outerRadius={55} innerRadius={24}>
-                  {chartEst.map((e,i)=><Cell key={i} fill={e.fill}/>)}
-                </Pie>
-                <Legend iconSize={8} wrapperStyle={{fontSize:11}}/>
-                <Tooltip contentStyle={{fontSize:12,borderRadius:6}}/>
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="card">
-          <p style={{fontSize:13,fontWeight:500,marginBottom:12}}>Equipos de mayor riesgo</p>
-          {action.slice(0,6).map(e=>{
-            const r=getRiesgo(e.criticidad,e.estado);
-            return (
-              <div key={e.id} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",borderBottom:"0.5px solid var(--border)"}}>
-                <span style={{fontSize:16,flexShrink:0}}>{R[r].emoji}</span>
-                <div style={{flex:1,minWidth:0}}>
-                  <p style={{fontSize:13,fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.fabricante} {e.modelo}</p>
-                  <p style={{fontSize:11,color:"var(--text2)"}}>{e.planta} · {e.linea}</p>
-                </div>
-                <div style={{textAlign:"right",flexShrink:0}}>
-                  <Badge r={r}/>
-                  {e.finSoporte&&<p style={{fontSize:10,color:"var(--text3)",marginTop:2}}>Fin: {e.finSoporte}</p>}
-                </div>
-              </div>
-            );
-          })}
-          {action.length===0&&<p style={{fontSize:12,color:"var(--text2)"}}>✅ No hay equipos en riesgo crítico.</p>}
-        </div>
-      </>}
-
-      {/* ══ INVENTARIO ══ */}
-      {activeTab==="inventario" && <>
-        {showForm ? (
-          <div className="card" style={{marginBottom:16,borderColor:"var(--accent)"}}>
-            <p style={{fontSize:14,fontWeight:500,marginBottom:14}}>{form.id?"Editar equipo":"Agregar equipo"}</p>
-            <div className="grid-form" style={{marginBottom:12}}>
-              {[
-                ["planta","Planta",PLANTAS],["linea","Línea de producción"],["area","Área",AREAS],
-                ["fabricante","Fabricante"],["modelo","Modelo"],["mlfb","MLFB / N° de parte"],
-                ["nroSerie","N° de serie"],["anio","Año instalación"],["criticidad","Criticidad",CRITICIDADES],
-                ["estado","Estado ciclo de vida (SIOS)",ESTADOS_CV],["finSoporte","Fin de soporte (AAAA-MM)"],
-                ["reemplazo","Reemplazo sugerido"],["responsable","Responsable ACL"],
-                ["fechaMigracion","Fecha migración planificada"],["costo","Costo estimado (USD)"],
-              ].map(([k,label,opts])=>(
-                <div key={k}>
-                  <label className="lbl">{label}</label>
-                  {opts
-                    ? <select value={form[k]||""} onChange={ev=>setF(k,ev.target.value)}>{opts.map(o=><option key={o}>{o}</option>)}</select>
-                    : <input  value={form[k]||""} onChange={ev=>setF(k,ev.target.value)}/>
-                  }
-                </div>
-              ))}
-              <div style={{gridColumn:"1/-1"}}>
-                <label style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer",fontSize:13}}>
-                  <input type="checkbox" checked={!!form.repuesto} onChange={ev=>setF("repuesto",ev.target.checked)} style={{width:"auto"}}/>
-                  Hay repuesto disponible en almacén SAP
-                </label>
-              </div>
-              <div style={{gridColumn:"1/-1"}}>
-                <label className="lbl">Notas</label>
-                <textarea value={form.notas||""} onChange={ev=>setF("notas",ev.target.value)} rows={2} style={{resize:"vertical"}}/>
-              </div>
-            </div>
-            <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
-              <button onClick={()=>setShowForm(false)}>Cancelar</button>
-              <button className="primary" onClick={saveForm}>Guardar equipo</button>
-            </div>
-          </div>
-        ) : (
-          <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap",alignItems:"center"}}>
-            <input placeholder="Buscar modelo, MLFB, planta..." value={filters.q} onChange={e=>setFilters(p=>({...p,q:e.target.value}))} style={{flex:1,minWidth:140,width:"auto"}}/>
-            {[["planta",PLANTAS,"Planta"],["estado",ESTADOS_CV,"Estado"],["crit",CRITICIDADES,"Criticidad"]].map(([k,opts,ph])=>(
-              <select key={k} value={filters[k]} onChange={e=>setFilters(p=>({...p,[k]:e.target.value}))} style={{width:"auto",minWidth:110}}>
-                <option value="">Todo {ph}</option>
-                {opts.map(o=><option key={o}>{o}</option>)}
-              </select>
-            ))}
-            <button className="primary" onClick={openAdd}>+ Agregar</button>
-          </div>
-        )}
-
-        {!showForm && <>
-          <p style={{fontSize:12,color:"var(--text2)",marginBottom:8}}>{filtered.length} equipo{filtered.length!==1?"s":""}</p>
-          <div className="scroll-x">
-            <table>
-              <thead><tr>
-                {["Planta","Línea","Fabricante","Modelo","MLFB","Crit.","Estado CV","Riesgo","Resp.",""].map(h=><th key={h}>{h}</th>)}
-              </tr></thead>
-              <tbody>
-                {filtered.map(e=>(
-                  <tr key={e.id}>
-                    <td><strong>{e.planta}</strong></td>
-                    <td style={{color:"var(--text2)"}}>{e.linea}</td>
-                    <td>{e.fabricante}</td>
-                    <td>{e.modelo}</td>
-                    <td><span className="mono">{e.mlfb}</span></td>
-                    <td><CBadge c={e.criticidad}/></td>
-                    <td><EBadge e={e.estado}/></td>
-                    <td><Badge r={getRiesgo(e.criticidad,e.estado)}/></td>
-                    <td style={{color:"var(--text2)",fontSize:11}}>{e.responsable||"—"}</td>
-                    <td style={{whiteSpace:"nowrap"}}>
-                      <button style={{marginRight:4,fontSize:11,padding:"3px 7px"}} onClick={()=>openEdit(e)}>Editar</button>
-                      <button className="danger" style={{fontSize:11,padding:"3px 7px"}} onClick={()=>delItem(e.id)}>✕</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filtered.length===0&&<p style={{padding:"2rem",textAlign:"center",color:"var(--text2)"}}>No hay equipos con esos filtros.</p>}
-          </div>
-        </>}
-      </>}
-
-      {/* ══ MATRIZ DE RIESGO ══ */}
-      {activeTab==="riesgo" && <>
-        <p style={{fontSize:13,color:"var(--text2)",marginBottom:14}}>Criticidad operacional × estado del ciclo de vida. Identifica dónde concentrar los recursos.</p>
-
-        <div className="scroll-x" style={{marginBottom:20}}>
-          <table style={{minWidth:480}}>
-            <thead><tr>
-              <th style={{minWidth:90}}>Criticidad</th>
-              {["Active","Classic","Phaseout","Discontinued"].map(s=><th key={s} style={{textAlign:"center",minWidth:110}}>{s}</th>)}
-            </tr></thead>
-            <tbody>
-              {CRITICIDADES.map(crit=>(
-                <tr key={crit}>
-                  <td style={{fontWeight:500,background:"var(--surface2)"}}>{crit}</td>
-                  {["Active","Classic","Phaseout","Discontinued"].map(est=>{
-                    const r=getRiesgo(crit,est);
-                    const rc=R[r];
-                    const count=equipos.filter(e=>e.criticidad===crit&&e.estado===est).length;
-                    return (
-                      <td key={est} style={{textAlign:"center",background:count>0?rc.bg:"var(--surface)",borderLeft:"0.5px solid var(--border)",padding:"12px"}}>
-                        {count>0
-                          ? <><div style={{fontSize:22,fontWeight:600,color:rc.color}}>{count}</div><div style={{fontSize:10,color:rc.text}}>{rc.label}</div></>
-                          : <span style={{color:"var(--border2)"}}>·</span>}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:20}}>
-          {Object.entries(R).filter(([k])=>k!=="gris").map(([k,rc])=>(
-            <div key={k} style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"var(--text2)"}}>
-              <span style={{width:12,height:12,borderRadius:3,background:rc.bg,border:`1.5px solid ${rc.color}`,display:"inline-block"}}/>
-              {rc.emoji} {rc.label}
-            </div>
-          ))}
-        </div>
-
-        {["rojo","naranja","amarillo"].map(nivel=>{
-          const items=equipos.filter(e=>getRiesgo(e.criticidad,e.estado)===nivel);
-          if(!items.length) return null;
-          const rc=R[nivel];
-          return (
-            <div key={nivel} style={{border:`0.5px solid ${rc.color}`,borderRadius:10,padding:14,marginBottom:12,background:"var(--surface)"}}>
-              <p style={{fontSize:13,fontWeight:500,color:rc.text,marginBottom:8}}>{rc.emoji} {rc.label} — {items.length} equipo{items.length!==1?"s":""}</p>
-              {items.map(e=>(
-                <div key={e.id} style={{display:"flex",gap:8,alignItems:"center",padding:"5px 0",borderBottom:`0.5px solid ${rc.color}22`,fontSize:12,flexWrap:"wrap"}}>
-                  <strong style={{minWidth:80}}>{e.planta}</strong>
-                  <span>{e.fabricante} {e.modelo}</span>
-                  <span className="mono" style={{color:"var(--text3)"}}>{e.mlfb}</span>
-                  <span style={{marginLeft:"auto",color:"var(--text2)",flexShrink:0}}>Crit. {e.criticidad}{e.finSoporte&&` · Fin ${e.finSoporte}`}</span>
-                </div>
-              ))}
-            </div>
-          );
-        })}
-      </>}
-
-      {/* ══ PLAN DE ACCIÓN ══ */}
-      {activeTab==="plan" && <>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8,marginBottom:14}}>
-          <p style={{fontSize:13,color:"var(--text2)"}}>{action.length} equipo{action.length!==1?"s requieren":"  requiere"} acción inmediata.</p>
-          {!apiKey&&<button onClick={()=>{setApiKeyInput("");setShowSettings(true)}} style={{fontSize:12,padding:"5px 12px"}}>⚙️ Configurar IA para recomendaciones</button>}
-        </div>
-
-        {action.length===0&&<div className="card" style={{textAlign:"center",padding:"3rem",color:"var(--text2)"}}>✅ No hay equipos en riesgo crítico o alto actualmente.</div>}
-
-        {action.map(e=>{
-          const r=getRiesgo(e.criticidad,e.estado);
-          const rc=R[r];
-          const aiE=ai[e.id];
-          return (
-            <div key={e.id} style={{border:`0.5px solid ${rc.color}`,borderRadius:10,padding:14,marginBottom:14,background:"var(--surface)"}}>
-              <div style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:10,flexWrap:"wrap"}}>
-                <Badge r={r}/>
-                <div style={{flex:1,minWidth:200}}>
-                  <p style={{fontSize:14,fontWeight:500}}>{e.fabricante} {e.modelo}</p>
-                  <p style={{fontSize:12,color:"var(--text2)"}}>{e.planta} · {e.linea} · {e.area} · <span className="mono">{e.mlfb}</span></p>
-                </div>
-                <button style={{fontSize:11,padding:"4px 8px"}} onClick={()=>openEdit(e)}>Editar</button>
-              </div>
-
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:6,fontSize:12,background:"var(--surface2)",borderRadius:8,padding:"10px 12px",marginBottom:10}}>
-                {[["Estado",<EBadge e={e.estado}/>],["Criticidad",<CBadge c={e.criticidad}/>],["Fin soporte",e.finSoporte||"—"],["Reemplazo",e.reemplazo||"Por definir"],["Responsable",e.responsable||"Sin asignar"],["Repuesto",e.repuesto?"✅ Sí":"❌ No"],e.costo&&["Costo est.","USD "+e.costo],e.fechaMigracion&&["Migración",e.fechaMigracion]].filter(Boolean).map(([k,v])=>(
-                  <div key={k}><span style={{color:"var(--text2)"}}>{k}: </span><strong>{v}</strong></div>
-                ))}
-              </div>
-
-              {e.notas&&<p style={{fontSize:12,color:"var(--text2)",marginBottom:10,fontStyle:"italic"}}>📝 {e.notas}</p>}
-
-              {!aiE&&<button className="primary" onClick={()=>getAiRec(e)}>✨ Obtener recomendación IA</button>}
-              {aiE?.loading&&<p style={{fontSize:12,color:"var(--text2)",padding:"6px 0"}}>⏳ Analizando con IA...</p>}
-              {aiE?.text&&(
-                <div className="ai-box">
-                  <p className="ai-label">✨ Recomendación IA — {e.fabricante} {e.modelo} · {e.planta}</p>
-                  <p className="ai-text">{aiE.text}</p>
-                  <button style={{fontSize:11,padding:"3px 8px",marginTop:8}} onClick={()=>setAi(p=>({...p,[e.id]:undefined}))}>Limpiar</button>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </>}
-
-      {/* ══ Settings modal (API Key) ══ */}
-      {showSettings&&(
-        <div className="settings-overlay" onClick={()=>setShowSettings(false)}>
-          <div className="settings-box" onClick={e=>e.stopPropagation()}>
-            <p style={{fontSize:15,fontWeight:600,marginBottom:6}}>Configurar API Key de Anthropic</p>
-            <p style={{fontSize:12,color:"var(--text2)",marginBottom:16}}>Necesitas una API key de <a href="https://console.anthropic.com" target="_blank" rel="noreferrer" style={{color:"var(--accent)"}}>console.anthropic.com</a> para usar las recomendaciones de IA. Se guarda solo en este navegador.</p>
-            <label className="lbl">API Key</label>
-            <input type="password" value={apiKeyInput} onChange={e=>setApiKeyInput(e.target.value)} placeholder="sk-ant-..." style={{marginBottom:14}}/>
-            <p style={{fontSize:11,color:"var(--text3)",marginBottom:14}}>⚠️ La clave se almacena en localStorage de tu navegador. No la compartas en computadoras públicas.</p>
-            <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
-              <button onClick={()=>setShowSettings(false)}>Cancelar</button>
-              {apiKey&&<button className="danger" onClick={()=>{localStorage.removeItem(API_KEY_KEY);setApiKey("");setApiKeyInput("");setShowSettings(false)}}>Eliminar clave</button>}
-              <button className="primary" onClick={saveApiKey}>Guardar</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <p style={{fontSize:11,color:"var(--text3)",textAlign:"center",marginTop:2rem,paddingTop:"1rem",borderTop:"0.5px solid var(--border)"}}>
-        ACL Gestión de Obsolescencia · Datos guardados localmente en este navegador
-      </p>
-    </div>
+  children.flat(Infinity).forEach(c=>{
+    if(c==null||c===false) return;
+    el.appendChild(typeof c==='string'||typeof c==='number'?document.createTextNode(c):c);
+  });
+  return el;
+}
+function div(cls,...c){return h('div',{class:cls},...c);}
+function span(cls,txt){const e=h('span',{class:cls});e.textContent=txt;return e;}
+function badge(r){const rc=R[r]||R.gris;const b=h('span',{class:'badge'});b.textContent=rc.em+' '+rc.label;b.style.background=rc.bg;b.style.color=rc.tx;return b;}
+function ebadge(e){const b=h('span',{class:'badge'});b.textContent=e;b.style.background=EB[e]||'#f1efe8';b.style.color=EC[e]||'#5f5e5a';return b;}
+function cbadge(c){const m=CB[c]||['#f1efe8','#5f5e5a'];const b=h('span',{class:'badge'});b.textContent=c;b.style.background=m[0];b.style.color=m[1];return b;}
+function kpi(label,val,bg,tc,lc){
+  return h('div',{style:{background:bg,border:'0.5px solid var(--bd)',borderRadius:'10px',padding:'12px 14px'}},
+    h('div',{style:{fontSize:'11px',color:lc,marginBottom:'4px'}},label),
+    h('div',{style:{fontSize:'28px',fontWeight:'600',color:tc,lineHeight:'1'}},String(val))
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+// ── Simple bar chart ──
+function barChart(data,maxVal){
+  if(!maxVal) maxVal=Math.max(...data.map(d=>d.total),1);
+  return div('bar-wrap',...data.map(d=>{
+    const pct=v=>Math.round(v/maxVal*100)+'%';
+    return div('bar-row',
+      h('div',{class:'bar-label',title:d.full||d.name},d.name),
+      h('div',{class:'bar-track'},
+        h('div',{class:'bar-fill',style:{width:pct(d.total),background:'#378ADD',borderRadius:'4px'}}),
+        d.riesgo>0?h('div',{class:'bar-fill',style:{width:pct(d.riesgo),background:'#E24B4A',borderRadius:'0 4px 4px 0'}}):null
+      ),
+      h('div',{class:'bar-val'},d.total)
+    );
+  }));
+}
+
+// ── Legend for state chart ──
+function stateLegend(data){
+  return div('pie-wrap',...data.map(d=>{
+    const row=div('pie-item');
+    const dot=h('div',{class:'pie-dot',style:{background:d.fill}});
+    row.appendChild(dot);
+    row.appendChild(document.createTextNode(d.name+': '+d.value));
+    return row;
+  }));
+}
+
+// ── Render ──
+function render(){
+  const app=document.getElementById('app');
+  app.innerHTML='';
+
+  const byR=(r)=>equipos.filter(e=>getRiesgo(e.criticidad,e.estado)===r);
+  const rojos=byR('rojo'),naranjas=byR('naranja');
+  const sinVer=equipos.filter(e=>!e.estado||e.estado==='Sin verificar');
+  const disc=equipos.filter(e=>e.estado==='Discontinued');
+  const action=[...rojos,...naranjas];
+
+  const filtered=equipos.filter(e=>{
+    const {planta,estado,crit,q}=filters;
+    if(planta&&e.planta!==planta)return false;
+    if(estado&&e.estado!==estado)return false;
+    if(crit&&e.criticidad!==crit)return false;
+    if(q&&!`${e.fabricante} ${e.modelo} ${e.mlfb} ${e.planta} ${e.linea}`.toLowerCase().includes(q.toLowerCase()))return false;
+    return true;
+  });
+
+  const chartPlanta=PLANTAS.map(p=>({
+    name:p.length>7?p.slice(0,7):p,full:p,
+    total:equipos.filter(e=>e.planta===p).length,
+    riesgo:equipos.filter(e=>e.planta===p&&['rojo','naranja'].includes(getRiesgo(e.criticidad,e.estado))).length,
+  })).filter(p=>p.total>0);
+
+  const chartEst=[
+    {name:'Active',       value:equipos.filter(e=>e.estado==='Active').length,       fill:'#639922'},
+    {name:'Classic',      value:equipos.filter(e=>e.estado==='Classic').length,      fill:'#378ADD'},
+    {name:'Phaseout',     value:equipos.filter(e=>e.estado==='Phaseout').length,     fill:'#EF9F27'},
+    {name:'Discontinued', value:equipos.filter(e=>e.estado==='Discontinued').length, fill:'#E24B4A'},
+    {name:'Sin verif.',   value:sinVer.length,                                        fill:'#888780'},
+  ].filter(d=>d.value>0);
+
+  const PHASES=[
+    {n:1,label:'Inventario',    done:equipos.length>0},
+    {n:2,label:'Diagnóstico',   done:equipos.some(e=>e.estado!=='Sin verificar')},
+    {n:3,label:'Base de datos', done:equipos.length>=SAMPLE.length},
+    {n:4,label:'Plan de acción',done:action.some(e=>e.responsable||e.fechaMigracion)},
+  ];
+
+  // Header
+  const header=h('div',{style:{display:'flex',alignItems:'flex-start',justifyContent:'space-between',flexWrap:'wrap',gap:'10px',marginBottom:'16px'}},
+    h('div',null,
+      h('h1',{style:{fontSize:'17px',fontWeight:'600',marginBottom:'2px'}},'Gestión de Obsolescencia Electrónica'),
+      h('p',{style:{fontSize:'12px',color:'var(--tx2)'}},'Arca Continental Lindley · '+equipos.length+' equipos · 6 plantas')
+    ),
+    h('div',{style:{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}},
+      ...PHASES.map(p=>{
+        const c=h('div',{title:'Fase '+p.n+': '+p.label,style:{width:'24px',height:'24px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'600',background:p.done?'var(--ac)':'var(--bd2)',color:p.done?'#fff':'var(--tx3)',cursor:'default'}});
+        c.textContent=p.done?'✓':String(p.n);
+        return c;
+      }),
+      h('span',{style:{fontSize:'11px',color:'var(--tx2)'}},'fases'),
+      h('button',{style:{fontSize:'11px',padding:'4px 10px'},onclick:()=>{showSettings=true;render();}},'⚙️ IA '+(apiKey?'✅':'❌'))
+    )
+  );
+  app.appendChild(header);
+
+  // Tabs
+  const tabBar=h('div',{style:{display:'flex',gap:'6px',marginBottom:'18px',overflowX:'auto',paddingBottom:'4px'}});
+  [['dashboard','📊 Dashboard'],['inventario','📋 Inventario'],['riesgo','⚠️ Matriz'],['plan','🚨 Plan de acción']].forEach(([id,label])=>{
+    const t=h('button',{class:'tab'+(activeTab===id?' on':''),onclick:()=>{activeTab=id;render();}});
+    t.textContent=label;
+    tabBar.appendChild(t);
+  });
+  app.appendChild(tabBar);
+
+  // ── DASHBOARD ──
+  if(activeTab==='dashboard'){
+    const kpiGrid=div('grid-kpi');
+    [
+      ['Total equipos',   equipos.length,'var(--s1)','var(--tx)','var(--tx2)'],
+      ['🔴 Críticos',      rojos.length,  '#fcebeb',  '#a32d2d', '#c04040'],
+      ['🟠 Alto riesgo',   naranjas.length,'#faeeda',  '#854f0b', '#a06010'],
+      ['⚪ Sin verificar', sinVer.length,  '#f1efe8',  '#5f5e5a', '#888780'],
+      ['Discontinued',    disc.length,   '#fcebeb',  '#a32d2d', '#c04040'],
+    ].forEach(([l,v,bg,tc,lc])=>kpiGrid.appendChild(kpi(l,v,bg,tc,lc)));
+    app.appendChild(kpiGrid);
+
+    const charts=div('grid2');
+
+    // Bar chart card
+    const bc=div('card');
+    bc.appendChild(h('p',{style:{fontSize:'13px',fontWeight:'500',marginBottom:'10px'}},'Equipos por planta'));
+    const legend=h('div',{style:{display:'flex',gap:'12px',fontSize:'11px',color:'var(--tx2)',marginBottom:'8px'}},
+      h('span',null,h('span',{style:{display:'inline-block',width:'10px',height:'10px',background:'#378ADD',borderRadius:'2px',marginRight:'3px'}}),'Total'),
+      h('span',null,h('span',{style:{display:'inline-block',width:'10px',height:'10px',background:'#E24B4A',borderRadius:'2px',marginRight:'3px'}}),'En riesgo')
+    );
+    bc.appendChild(legend);
+    bc.appendChild(barChart(chartPlanta));
+    charts.appendChild(bc);
+
+    // State chart card
+    const sc=div('card');
+    sc.appendChild(h('p',{style:{fontSize:'13px',fontWeight:'500',marginBottom:'10px'}},'Estado ciclo de vida'));
+    const total=chartEst.reduce((a,d)=>a+d.value,0)||1;
+    const barTrack=h('div',{style:{height:'28px',borderRadius:'6px',overflow:'hidden',display:'flex',marginBottom:'10px'}});
+    chartEst.forEach(d=>{
+      const seg=h('div',{style:{width:Math.round(d.value/total*100)+'%',background:d.fill,transition:'width .4s'}});
+      barTrack.appendChild(seg);
+    });
+    sc.appendChild(barTrack);
+    sc.appendChild(stateLegend(chartEst));
+    charts.appendChild(sc);
+    app.appendChild(charts);
+
+    // Top risk
+    const tr=div('card');
+    tr.appendChild(h('p',{style:{fontSize:'13px',fontWeight:'500',marginBottom:'12px'}},'Equipos de mayor riesgo'));
+    if(action.length===0){
+      tr.appendChild(h('p',{style:{fontSize:'12px',color:'var(--tx2)'}},'✅ No hay equipos en riesgo crítico.'));
+    } else {
+      action.slice(0,6).forEach(e=>{
+        const r=getRiesgo(e.criticidad,e.estado);
+        const row=h('div',{style:{display:'flex',alignItems:'center',gap:'10px',padding:'7px 0',borderBottom:'0.5px solid var(--bd)'}},
+          h('span',{style:{fontSize:'16px',flexShrink:'0'}},R[r].em),
+          h('div',{style:{flex:'1',minWidth:'0'}},
+            h('p',{style:{fontSize:'13px',fontWeight:'500',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},e.fabricante+' '+e.modelo),
+            h('p',{style:{fontSize:'11px',color:'var(--tx2)'}},e.planta+' · '+e.linea)
+          ),
+          h('div',{style:{textAlign:'right',flexShrink:'0'}},
+            badge(r),
+            e.finSoporte?h('p',{style:{fontSize:'10px',color:'var(--tx3)',marginTop:'2px'}},'Fin: '+e.finSoporte):null
+          )
+        );
+        tr.appendChild(row);
+      });
+    }
+    app.appendChild(tr);
+  }
+
+  // ── INVENTARIO ──
+  if(activeTab==='inventario'){
+    if(showForm){
+      const EMPTY={planta:'Pucusana',linea:'',area:'Control',fabricante:'Siemens',modelo:'',mlfb:'',nroSerie:'',anio:'',criticidad:'Alta',estado:'Sin verificar',finSoporte:'',reemplazo:'',repuesto:false,responsable:'',fechaMigracion:'',costo:'',notas:''};
+      if(!formData.___init){formData=Object.assign({},EMPTY,formData);formData.___init=true;}
+      const fc=div('card');
+      fc.style.borderColor='var(--ac)';
+      fc.style.marginBottom='16px';
+      fc.appendChild(h('p',{style:{fontSize:'14px',fontWeight:'500',marginBottom:'14px'}},formData.id?'Editar equipo':'Agregar equipo'));
+      const fg=div('grid-form');
+      const fields=[
+        ['planta','Planta',PLANTAS],['linea','Línea de producción'],['area','Área',AREAS],
+        ['fabricante','Fabricante'],['modelo','Modelo'],['mlfb','MLFB / N° de parte'],
+        ['nroSerie','N° de serie'],['anio','Año instalación'],['criticidad','Criticidad',CRITS],
+        ['estado','Estado ciclo de vida (SIOS)',ESTADOS],['finSoporte','Fin soporte (AAAA-MM)'],
+        ['reemplazo','Reemplazo sugerido'],['responsable','Responsable ACL'],
+        ['fechaMigracion','Fecha migración'],['costo','Costo estimado (USD)'],
+      ];
+      fields.forEach(([k,label,opts])=>{
+        const wrap=h('div',null,h('label',{class:'lbl'},label));
+        let inp;
+        if(opts){
+          inp=h('select',null,...opts.map(o=>h('option',{value:o},o)));
+          inp.value=formData[k]||opts[0];
+          inp.onchange=ev=>{formData[k]=ev.target.value;};
+        } else {
+          inp=h('input',{type:'text'});
+          inp.value=formData[k]||'';
+          inp.oninput=ev=>{formData[k]=ev.target.value;};
+        }
+        wrap.appendChild(inp);
+        fg.appendChild(wrap);
+      });
+      // checkbox
+      const cw=h('div',{style:{gridColumn:'1/-1'}});
+      const cl=h('label',{style:{display:'flex',alignItems:'center',gap:'6px',cursor:'pointer',fontSize:'13px'}});
+      const cb=h('input',{type:'checkbox',style:{width:'auto'}});
+      cb.checked=!!formData.repuesto;
+      cb.onchange=ev=>{formData.repuesto=ev.target.checked;};
+      cl.appendChild(cb);
+      cl.appendChild(document.createTextNode('Hay repuesto en almacén SAP'));
+      cw.appendChild(cl);
+      fg.appendChild(cw);
+      // notas
+      const nw=h('div',{style:{gridColumn:'1/-1'}});
+      nw.appendChild(h('label',{class:'lbl'},'Notas'));
+      const ta=h('textarea',{rows:'2',style:{resize:'vertical'}});
+      ta.value=formData.notas||'';
+      ta.oninput=ev=>{formData.notas=ev.target.value;};
+      nw.appendChild(ta);
+      fg.appendChild(nw);
+      fc.appendChild(fg);
+      const btns=h('div',{style:{display:'flex',gap:'8px',justifyContent:'flex-end',marginTop:'12px'}},
+        h('button',{onclick:()=>{showForm=false;formData={};render();}},'Cancelar'),
+        h('button',{class:'pri',onclick:()=>{
+          const d={...formData};delete d.___init;
+          if(d.id){equipos=equipos.map(e=>e.id===d.id?d:e);}
+          else{d.id=Date.now().toString();equipos=[...equipos,d];}
+          persist();showForm=false;formData={};render();
+        }},'Guardar equipo')
+      );
+      fc.appendChild(btns);
+      app.appendChild(fc);
+    } else {
+      const fbar=h('div',{style:{display:'flex',gap:'8px',marginBottom:'10px',flexWrap:'wrap',alignItems:'center'}});
+      const qi=h('input',{type:'text',placeholder:'Buscar modelo, MLFB, planta...',style:{flex:'1',minWidth:'140px',width:'auto'}});
+      qi.value=filters.q;
+      qi.oninput=ev=>{filters.q=ev.target.value;render();};
+      fbar.appendChild(qi);
+      [['planta',PLANTAS,'Planta'],['estado',ESTADOS,'Estado'],['crit',CRITS,'Criticidad']].forEach(([k,opts,ph])=>{
+        const sel=h('select',{style:{width:'auto',minWidth:'110px'}},h('option',{value:''},'Todo '+ph),...opts.map(o=>h('option',{value:o},o)));
+        sel.value=filters[k];
+        sel.onchange=ev=>{filters[k]=ev.target.value;render();};
+        fbar.appendChild(sel);
+      });
+      fbar.appendChild(h('button',{class:'pri',onclick:()=>{showForm=true;formData={};render();}},'+ Agregar'));
+      app.appendChild(fbar);
+      app.appendChild(h('p',{style:{fontSize:'12px',color:'var(--tx2)',marginBottom:'8px'}},filtered.length+' equipo'+(filtered.length!==1?'s':'')));
+      const wrap=div('scroll');
+      const tbl=h('table',null,
+        h('thead',null,h('tr',null,...['Planta','Línea','Fabricante','Modelo','MLFB','Crit.','Estado CV','Riesgo','Resp.',''].map(t=>h('th',null,t)))),
+        h('tbody',null,...filtered.map(e=>h('tr',null,
+          h('td',null,h('strong',null,e.planta)),
+          h('td',{style:{color:'var(--tx2)'}},e.linea),
+          h('td',null,e.fabricante),
+          h('td',null,e.modelo),
+          h('td',null,h('span',{class:'mono'},e.mlfb)),
+          h('td',null,cbadge(e.criticidad)),
+          h('td',null,ebadge(e.estado)),
+          h('td',null,badge(getRiesgo(e.criticidad,e.estado))),
+          h('td',{style:{color:'var(--tx2)',fontSize:'11px'}},e.responsable||'—'),
+          h('td',{style:{whiteSpace:'nowrap'}},
+            h('button',{style:{marginRight:'4px',fontSize:'11px',padding:'3px 7px'},onclick:()=>{showForm=true;formData={...e};render();}},'Editar'),
+            h('button',{class:'del',style:{fontSize:'11px',padding:'3px 7px'},onclick:()=>{if(confirm('¿Eliminar?')){equipos=equipos.filter(x=>x.id!==e.id);persist();render();}}},'✕')
+          )
+        )))
+      );
+      if(filtered.length===0){
+        const empty=h('p',{style:{padding:'2rem',textAlign:'center',color:'var(--tx2)'}},'No hay equipos con esos filtros.');
+        wrap.appendChild(empty);
+      } else { wrap.appendChild(tbl); }
+      app.appendChild(wrap);
+    }
+  }
+
+  // ── MATRIZ DE RIESGO ──
+  if(activeTab==='riesgo'){
+    app.appendChild(h('p',{style:{fontSize:'13px',color:'var(--tx2)',marginBottom:'14px'}},'Criticidad operacional × estado del ciclo de vida. Identifica dónde concentrar los recursos.'));
+    const wrap=div('scroll');
+    const tbl=h('table',{class:'risk-table'},
+      h('thead',null,h('tr',null,
+        h('th',null,'Criticidad'),
+        ...['Active','Classic','Phaseout','Discontinued'].map(s=>h('th',null,s))
+      )),
+      h('tbody',null,...CRITS.map(crit=>h('tr',null,
+        h('td',null,crit),
+        ...['Active','Classic','Phaseout','Discontinued'].map(est=>{
+          const r=getRiesgo(crit,est);
+          const rc=R[r];
+          const count=equipos.filter(e=>e.criticidad===crit&&e.estado===est).length;
+          const td=h('td',{style:{background:count>0?rc.bg:'var(--s1)'}});
+          if(count>0){
+            td.appendChild(h('div',{style:{fontSize:'22px',fontWeight:'600',color:rc.color}},String(count)));
+            td.appendChild(h('div',{style:{fontSize:'10px',color:rc.tx}},rc.label));
+          } else {
+            td.appendChild(document.createTextNode('·'));
+            td.style.color='var(--bd2)';
+          }
+          return td;
+        })
+      )))
+    );
+    wrap.appendChild(tbl);
+    app.appendChild(wrap);
+
+    const lgd=h('div',{style:{display:'flex',gap:'10px',flexWrap:'wrap',margin:'14px 0'}});
+    Object.entries(R).filter(([k])=>k!=='gris').forEach(([k,rc])=>{
+      const item=h('div',{style:{display:'flex',alignItems:'center',gap:'5px',fontSize:'12px',color:'var(--tx2)'}},
+        h('span',{style:{width:'12px',height:'12px',borderRadius:'3px',background:rc.bg,border:'1.5px solid '+rc.color,display:'inline-block'}}),
+        document.createTextNode(rc.em+' '+rc.label)
+      );
+      lgd.appendChild(item);
+    });
+    app.appendChild(lgd);
+
+    ['rojo','naranja','amarillo'].forEach(nivel=>{
+      const items=equipos.filter(e=>getRiesgo(e.criticidad,e.estado)===nivel);
+      if(!items.length)return;
+      const rc=R[nivel];
+      const box=h('div',{style:{border:'0.5px solid '+rc.color,borderRadius:'10px',padding:'14px',marginBottom:'12px',background:'var(--s1)'}});
+      box.appendChild(h('p',{style:{fontSize:'13px',fontWeight:'500',color:rc.tx,marginBottom:'8px'}},rc.em+' '+rc.label+' — '+items.length+' equipo'+(items.length!==1?'s':'')));
+      items.forEach(e=>{
+        const row=h('div',{style:{display:'flex',gap:'8px',alignItems:'center',padding:'5px 0',borderBottom:'0.5px solid '+rc.color+'22',fontSize:'12px',flexWrap:'wrap'}},
+          h('strong',{style:{minWidth:'80px'}},e.planta),
+          document.createTextNode(e.fabricante+' '+e.modelo),
+          h('span',{class:'mono',style:{color:'var(--tx3)'}},e.mlfb),
+          h('span',{style:{marginLeft:'auto',color:'var(--tx2)',flexShrink:'0'}},'Crit. '+e.criticidad+(e.finSoporte?' · Fin '+e.finSoporte:''))
+        );
+        box.appendChild(row);
+      });
+      app.appendChild(box);
+    });
+  }
+
+  // ── PLAN DE ACCIÓN ──
+  if(activeTab==='plan'){
+    const ph=h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:'8px',marginBottom:'14px'}},
+      h('p',{style:{fontSize:'13px',color:'var(--tx2)'}},action.length+' equipo'+(action.length!==1?'s requieren':'  requiere')+' acción.'),
+      !apiKey?h('button',{onclick:()=>{showSettings=true;render();},style:{fontSize:'12px'}},'⚙️ Configurar IA para recomendaciones'):null
+    );
+    app.appendChild(ph);
+
+    if(action.length===0){
+      app.appendChild(h('div',{class:'card',style:{textAlign:'center',padding:'3rem',color:'var(--tx2)'}},'✅ No hay equipos en riesgo crítico o alto.'));
+    }
+
+    action.forEach(e=>{
+      const r=getRiesgo(e.criticidad,e.estado);
+      const rc=R[r];
+      const aiE=aiState[e.id];
+      const box=h('div',{style:{border:'0.5px solid '+rc.color,borderRadius:'10px',padding:'14px',marginBottom:'14px',background:'var(--s1)'}});
+
+      box.appendChild(h('div',{style:{display:'flex',gap:'10px',alignItems:'flex-start',marginBottom:'10px',flexWrap:'wrap'}},
+        badge(r),
+        h('div',{style:{flex:'1',minWidth:'200px'}},
+          h('p',{style:{fontSize:'14px',fontWeight:'500'}},e.fabricante+' '+e.modelo),
+          h('p',{style:{fontSize:'12px',color:'var(--tx2)'}},e.planta+' · '+e.linea+' · '+e.area+' · ',h('span',{class:'mono'},e.mlfb))
+        ),
+        h('button',{style:{fontSize:'11px',padding:'4px 8px'},onclick:()=>{showForm=true;formData={...e};activeTab='inventario';render();}},'Editar')
+      ));
+
+      const info=h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:'6px',fontSize:'12px',background:'var(--s2)',borderRadius:'8px',padding:'10px 12px',marginBottom:'10px'}});
+      [['Estado',ebadge(e.estado)],['Criticidad',cbadge(e.criticidad)],['Fin soporte',e.finSoporte||'—'],['Reemplazo',e.reemplazo||'Por definir'],['Responsable',e.responsable||'Sin asignar'],['Repuesto',e.repuesto?'✅ Sí':'❌ No'],e.costo&&['Costo est.','USD '+e.costo],e.fechaMigracion&&['Migración',e.fechaMigracion]].filter(Boolean).forEach(([k,v])=>{
+        const cell=h('div',null,h('span',{style:{color:'var(--tx2)'}},k+': '),h('strong',null));
+        if(typeof v==='string'){cell.querySelector('strong').textContent=v;}
+        else{cell.querySelector('strong').appendChild(v);}
+        info.appendChild(cell);
+      });
+      box.appendChild(info);
+
+      if(e.notas) box.appendChild(h('p',{style:{fontSize:'12px',color:'var(--tx2)',marginBottom:'10px',fontStyle:'italic'}},'📝 '+e.notas));
+
+      if(!aiE){
+        box.appendChild(h('button',{class:'pri',onclick:()=>getAiRec(e)},'✨ Obtener recomendación IA'));
+      } else if(aiE.loading){
+        box.appendChild(h('p',{style:{fontSize:'12px',color:'var(--tx2)',padding:'6px 0'}},'⏳ Analizando con IA...'));
+      } else {
+        const ab=div('ai-box');
+        ab.appendChild(h('p',{style:{fontSize:'11px',fontWeight:'500',color:'var(--ac-tx)',marginBottom:'8px'}},'✨ Recomendación IA — '+e.fabricante+' '+e.modelo+' · '+e.planta));
+        const at=h('p',{style:{fontSize:'12px',lineHeight:'1.8',whiteSpace:'pre-wrap'}});
+        at.textContent=aiE.text;
+        ab.appendChild(at);
+        ab.appendChild(h('button',{style:{fontSize:'11px',padding:'3px 8px',marginTop:'8px'},onclick:()=>{delete aiState[e.id];render();}},'Limpiar'));
+        box.appendChild(ab);
+      }
+      app.appendChild(box);
+    });
+  }
+
+  // ── Settings modal ──
+  if(showSettings){
+    const ovl=h('div',{class:'modal-bg',onclick:()=>{showSettings=false;render();}});
+    const box=h('div',{class:'modal',onclick:ev=>ev.stopPropagation()});
+    box.appendChild(h('p',{style:{fontSize:'15px',fontWeight:'600',marginBottom:'6px'}},'Configurar API Key de Anthropic'));
+    box.appendChild(h('p',{style:{fontSize:'12px',color:'var(--tx2)',marginBottom:'16px'}},'Necesitas una API key de ',h('a',{href:'https://console.anthropic.com',target:'_blank'},'console.anthropic.com'),' para recomendaciones IA. Se guarda solo en este navegador.'));
+    box.appendChild(h('label',{class:'lbl'},'API Key'));
+    const ki=h('input',{type:'password',placeholder:'sk-ant-...',style:{marginBottom:'14px'}});
+    ki.value=apiKey;
+    box.appendChild(ki);
+    box.appendChild(h('p',{style:{fontSize:'11px',color:'var(--tx3)',marginBottom:'14px'}},'⚠️ La clave se almacena en localStorage de tu navegador. No la compartas en computadoras públicas.'));
+    const btns=h('div',{style:{display:'flex',gap:'8px',justifyContent:'flex-end'}},
+      h('button',{onclick:()=>{showSettings=false;render();}},'Cancelar'),
+      apiKey?h('button',{class:'del',onclick:()=>{localStorage.removeItem(AK);apiKey='';showSettings=false;render();}},'Eliminar clave'):null,
+      h('button',{class:'pri',onclick:()=>{apiKey=ki.value;localStorage.setItem(AK,apiKey);showSettings=false;render();}},'Guardar')
+    );
+    box.appendChild(btns);
+    ovl.appendChild(box);
+    app.appendChild(ovl);
+  }
+
+  // Footer
+  app.appendChild(h('p',{style:{fontSize:'11px',color:'var(--tx3)',textAlign:'center',marginTop:'2rem',paddingTop:'1rem',borderTop:'0.5px solid var(--bd)'}},'ACL Gestión de Obsolescencia · Datos guardados localmente en este navegador'));
+}
+
+async function getAiRec(eq){
+  if(!apiKey){showSettings=true;render();return;}
+  aiState[eq.id]={loading:true,text:''};
+  render();
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:`Soy especialista en automatización de Arca Continental Lindley (embotelladora Coca-Cola, Perú). Equipo obsoleto:\n\nPlanta: ${eq.planta} | Línea: ${eq.linea} | Área: ${eq.area}\nFabricante/Modelo: ${eq.fabricante} ${eq.modelo} (${eq.mlfb})\nCriticidad: ${eq.criticidad} | Estado SIOS: ${eq.estado}\nFin soporte: ${eq.finSoporte||'N/D'} | Reemplazo sugerido: ${eq.reemplazo||'No definido'}\nRepuesto: ${eq.repuesto?'Sí':'No'} | Notas: ${eq.notas||'Ninguna'}\n\nDame plan de acción con 5 puntos numerados:\n1. Acción inmediata esta semana\n2. Alternativa de reemplazo específica\n3. Riesgo si no se actúa en 3 meses\n4. Estrategia de migración\n5. Tiempo estimado\n\nSolo los 5 puntos, directo, en español.`}]})
+    });
+    const d=await res.json();
+    const text=d.content?.map(c=>c.text||'').join('')||(d.error?.message||'Sin respuesta.');
+    aiState[eq.id]={loading:false,text};
+  }catch(err){
+    aiState[eq.id]={loading:false,text:'Error de conexión: '+err.message};
+  }
+  render();
+}
+
+// ── Boot ──
+load();
+render();
 </script>
 </body>
 </html>
