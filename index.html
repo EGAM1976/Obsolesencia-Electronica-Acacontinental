@@ -260,25 +260,23 @@ function renderDetail(e){
 
 
 
+
 function renderWorkPlan(app,all){
 
-  /* ── persistence ── */
   let S={};
   try{S=JSON.parse(localStorage.getItem('wp4')||'{}');}catch{}
   const save=()=>{try{localStorage.setItem('wp4',JSON.stringify(S));}catch{}};
 
   function toggleTask(id){
-    S[id]=!S[id]; save();
-    const chk=document.getElementById('ck'+id);
-    const lbl=document.getElementById('lb'+id);
+    S[id]=!S[id];save();
+    const chk=document.getElementById('ck'+id);const lbl=document.getElementById('lb'+id);
     if(chk){chk.style.background=S[id]?'#4ade80':'transparent';chk.style.borderColor=S[id]?'#4ade80':'var(--bd2)';chk.style.color=S[id]?'#fff':'transparent';}
     if(lbl){lbl.style.textDecoration=S[id]?'line-through':'none';lbl.style.color=S[id]?'var(--tx2)':'var(--tx)';}
     recalc();
   }
   function toggleSub(id){
-    S[id]=!S[id]; save();
-    const chk=document.getElementById('ck'+id);
-    const lbl=document.getElementById('lb'+id);
+    S[id]=!S[id];save();
+    const chk=document.getElementById('ck'+id);const lbl=document.getElementById('lb'+id);
     if(chk){chk.style.background=S[id]?'#4ade80':'transparent';chk.style.borderColor=S[id]?'#4ade80':'var(--bd2)';chk.style.color=S[id]?'#fff':'transparent';}
     if(lbl){lbl.style.textDecoration=S[id]?'line-through':'none';}
   }
@@ -287,7 +285,7 @@ function renderWorkPlan(app,all){
   function recalc(){
     let gt=0,gd=0;
     Object.entries(PIDS).forEach(([pid,sids])=>{
-      const d=sids.filter(id=>S[id]).length, t=sids.length;
+      const d=sids.filter(id=>S[id]).length,t=sids.length;
       const pct=t?Math.round(d/t*100):0;
       ['wppm-'+pid,'wppct-'+pid].forEach(eid=>{const e=document.getElementById(eid);if(e)e.textContent=pct+'%';});
       const fp=document.getElementById('wpfp-'+pid);if(fp)fp.style.width=pct+'%';
@@ -299,25 +297,43 @@ function renderWorkPlan(app,all){
     const gb=document.getElementById('wpgbar');if(gb)gb.style.width=g+'%';
   }
 
-  /* ── DATA ── */
+  // Fabricantes por marca con portal de ciclo de vida
+  const MARCAS=[
+    {m:'SIEMENS',    tot:2414,obs:1394,disc:927,ph:412,ss:642,col:'#1760a8',portal:'support.industry.siemens.com',tool:'SIOS + mySupport',note:'Toda la info de ciclo de vida en SIOS. mySupport para alertas automáticas.'},
+    {m:'DANFOSS',    tot:1122,obs:1,  disc:0,  ph:0,  ss:1,  col:'#e24b4a',portal:'drives.danfoss.com/knowledge-center/product-lifecycle-status',tool:'Danfoss Lifecycle Portal',note:'1,076 variadores en buen estado. Solo 1 obsoleto registrado — verificar en portal Danfoss.'},
+    {m:'B&R',        tot:352, obs:107,disc:0,  ph:1,  ss:106,col:'#ef9f27',portal:'br-automation.com/en/service/lifecycle-management',tool:'B&R Lifecycle Management',note:'107 obsoletos y 106 SIN STOCK — segunda prioridad después de Siemens. Consultar B&R Lifecycle Portal.'},
+    {m:'SCHNEIDER',  tot:301, obs:79, disc:0,  ph:5,  ss:79, col:'#854f0b',portal:'se.com/ww/en/work/support/product-lifecycle-information.jsp',tool:'Schneider Product Lifecycle',note:'Incluye equipos Elau (adquiridos por Schneider). 79 obsoletos sin stock.'},
+    {m:'SEW EURODRIVE',tot:293,obs:0,disc:0,  ph:0,  ss:0,  col:'#3b6d11',portal:'sew-eurodrive.com/service/product-lifecycle',tool:'SEW Lifecycle',note:'Sin obsoletos registrados. Verificar periódicamente.'},
+    {m:'ABB',        tot:124, obs:0,  disc:0,  ph:0,  ss:0,  col:'#3b6d11',portal:'new.abb.com/service/abb-service/product-service-lifecycle',tool:'ABB Service Lifecycle',note:'Sin obsoletos registrados. Verificar periódicamente.'},
+    {m:'ALLEN BRADLEY',tot:106,obs:0,disc:0, ph:0,  ss:0,  col:'#3b6d11',portal:'rockwellautomation.com/en-us/support/product-lifecycle.html',tool:'Rockwell Lifecycle Status',note:'Sin obsoletos registrados. Rockwell tiene herramienta oficial de lifecycle.'},
+    {m:'PILZ',       tot:95,  obs:0,  disc:0,  ph:0,  ss:0,  col:'#3b6d11',portal:'pilz.com/en-INT/support/lifecycle-management',tool:'PILZ Lifecycle',note:'Sin obsoletos registrados.'},
+    {m:'BECKHOFF',   tot:82,  obs:0,  disc:0,  ph:0,  ss:0,  col:'#3b6d11',portal:'beckhoff.com/en-en/support',tool:'Beckhoff Support',note:'Sin obsoletos registrados.'},
+    {m:'KUKA',       tot:23,  obs:22, disc:0,  ph:0,  ss:22, col:'#a32d2d',portal:'kuka.com/en-de/services/kuka-service/lifecycle-management',tool:'KUKA Lifecycle',note:'22 de 23 equipos son obsoletos y SIN STOCK — prioridad alta. Consultar KUKA Lifecycle.'},
+    {m:'LEROY SOMER',tot:26,  obs:16, disc:0,  ph:0,  ss:16, col:'#a32d2d',portal:'leroy-somer.com',tool:'Leroy Somer / Nidec',note:'16 obsoletos sin stock. Ahora parte de Nidec — consultar leroy-somer.com para lifecycle.'},
+    {m:'ELAU',       tot:11,  obs:10, disc:0,  ph:0,  ss:10, col:'#a32d2d',portal:'se.com/en/work/support/product-lifecycle-information.jsp',tool:'Schneider (adquirió Elau)',note:'10 de 11 Elau son obsoletos sin stock. Schneider adquirió Elau — lifecycle en portal Schneider.'},
+    {m:'ENDRESS+HAUSER',tot:31,obs:0,disc:0, ph:0,  ss:0,  col:'#3b6d11',portal:'endress.com/en/services/lifecycle-services',tool:'E+H Lifecycle Services',note:'Sin obsoletos registrados. Verificar periódicamente en portal E+H.'},
+    {m:'OMRON',      tot:33,  obs:0,  disc:0,  ph:0,  ss:0,  col:'#3b6d11',portal:'industrial.omron.eu/en/products/eol',tool:'Omron EOL Portal',note:'Sin obsoletos registrados.'},
+    {m:'FESTO',      tot:31,  obs:0,  disc:0,  ph:0,  ss:0,  col:'#3b6d11',portal:'festo.com',tool:'Festo Support',note:'Sin obsoletos registrados.'},
+  ];
+
   const PHASES=[
   {id:'f1',n:'1',col:'#4ade80',tcol:'#000',bg:'#eaf3de',tx:'#3b6d11',
    title:'Fase 1 — Inventario: saber qué tienes',time:'Semanas 1–3',
    steps:[
     {id:'s11',title:'Listar todas las plantas y líneas de producción',
-     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#eaf3de;color:#3b6d11">Inicio</span>',
+     tag:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#eaf3de;color:#3b6d11">Inicio</span>',
      resp:'Edwin + Jefes planta',
-     desc:'Crear el mapa completo de ACL: 6 plantas, líneas por planta y áreas (Control, Eléctrica, Instrumentación). Es la columna vertebral de todo el inventario.',
+     desc:'Crear el mapa completo de ACL: 6 plantas, líneas por planta y áreas. Es la columna vertebral de todo el inventario.',
      subs:[
       {id:'s111',t:'Confirmar 6 plantas con códigos SAP: Pucusana (1040) · Trujillo (5040) · Zárate (2000) · Arequipa (7000) · Cuzco (7010) · Iquitos (6300)'},
       {id:'s112',t:'Levantar número de líneas de producción por planta con cada jefe de mantenimiento'},
-      {id:'s113',t:'Definir áreas: Tableros eléctricos · Paneles de control · Sala de instrumentación · SCADA'},
+      {id:'s113',t:'Definir áreas: Tableros eléctricos · Paneles de control · Sala de instrumentación · SCADA · Variadores'},
       {id:'s114',t:'Crear Excel base: Planta | Centro | Línea | Área | Denominación U.T.'},
      ],
      info:'✅ ACL ya tiene esto: 5,663 equipos · Pucusana 3,926 · Trujillo 984 · Zárate 304 · Arequipa 236 · Cuzco 119 · Iquitos 94'},
     {id:'s12',title:'Levantar inventario de equipos electrónicos por planta',
-     tags:'',resp:'Edwin + Ghersi + Técnicos',
-     desc:'Recorrer físicamente cada tablero y panel. Fotografiar la placa de cada equipo. Registrar todos los datos técnicos necesarios para consultar en SIOS.',
+     tag:'',resp:'Edwin + Ghersi + Técnicos',
+     desc:'Recorrer físicamente cada tablero y panel. Registrar todos los datos técnicos necesarios para consultar el estado de ciclo de vida en el portal de cada fabricante.',
      subs:[
       {id:'s121',t:'Registrar: Tipo componente | Marca | Modelo | Código parte MLFB | N° SAP Montaje | N° SAP Componente'},
       {id:'s122',t:'Capturar: Familia | Código Obsolescencia | Cantidad | N° de serie | Año fabricación/instalación'},
@@ -325,9 +341,9 @@ function renderWorkPlan(app,all){
       {id:'s124',t:'Verificar stock físico en almacén por planta y cruzar con SAP'},
       {id:'s125',t:'Consolidar en Excel unificado (33 campos del formato ACL) y cargar al sistema web'},
      ],
-     warn:'⚠️ Verificar cobertura al 100% de líneas en cada planta. Ghersi Chang ya tiene 300 equipos con responsable asignado.'},
+     warn:'⚠️ Verificar cobertura al 100% de líneas. El inventario ACL incluye 15+ fabricantes — cada uno tiene su propio portal de ciclo de vida.'},
     {id:'s13',title:'Priorizar equipos críticos (no todo es igual)',
-     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#faeeda;color:#854f0b">Decisión clave</span>',
+     tag:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#faeeda;color:#854f0b">Decisión clave</span>',
      resp:'Meliza + Edwin',
      desc:'Asignar criticidad según impacto en producción. Los de Criticidad Alta son la primera prioridad absoluta para intervención.',
      subs:[
@@ -335,219 +351,229 @@ function renderWorkPlan(app,all){
       {id:'s132',t:'Asignar Prioridad de Migración a cada equipo obsoleto: Urgente | Alta | Media | Baja'},
       {id:'s133',t:'Verificar si hay repuesto en almacén SAP para cada equipo crítico — define el nivel de exposición real'},
      ],
-     info:'✅ Estado actual ACL: 927 Urgente (Discontinued) · 418 Alta (Phaseout) · 916 obsoletos SIN stock de respaldo'},
+     info:'✅ Estado actual: 927 Urgente (Siemens Discontinued) · 107 obsoletos B&R sin stock · 79 obsoletos Schneider sin stock · 22 KUKA sin stock'},
    ]},
   {id:'f2',n:'2',col:'#4a9eff',tcol:'#fff',bg:'#ddeeff',tx:'#0c3d72',
    title:'Fase 2 — Diagnóstico: clasificar el estado de cada equipo',time:'Semanas 4–6',
    steps:[
-    {id:'s21',title:'Crear cuenta en SIOS y mySupport',
-     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#eaf3de;color:#3b6d11">Gratis</span>',
-     resp:'Edwin',
-     desc:'SIOS (Siemens Industry Online Support) permite consultar el estado del ciclo de vida de cada equipo. mySupport crea alertas automáticas. Tiempo estimado: 20 minutos.',
+    {id:'s21',title:'Crear cuenta en los portales de ciclo de vida — uno por fabricante',
+     tag:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#eaf3de;color:#3b6d11">Todos gratis</span>',
+     resp:'Edwin + Ghersi',
+     desc:'Cada fabricante tiene su propio portal de ciclo de vida. No existe un portal único. Hay que registrarse en los portales de cada fabricante presente en ACL.',
      subs:[
-      {id:'s211',t:'Ir a support.industry.siemens.com → Register con email corporativo ACL'},
-      {id:'s212',t:'Activar mySupport → agregar todos los equipos Siemens del inventario a la lista de seguimiento'},
-      {id:'s213',t:'Configurar notificaciones por email para cambios de estado de ciclo de vida'},
-      {id:'s214',t:'Para otros fabricantes: Rockwell → rockwellautomation.com · Schneider → se.com/productlifecycle · ABB → new.abb.com'},
+      {id:'s211',t:'🔵 SIEMENS (2,414 eq.) → support.industry.siemens.com — SIOS + mySupport para alertas automáticas'},
+      {id:'s212',t:'🔴 DANFOSS (1,122 eq.) → drives.danfoss.com/knowledge-center/product-lifecycle-status — Solo 1 obsoleto, pero verificar variadores frecuencia'},
+      {id:'s213',t:'🟠 B&R (352 eq.) → br-automation.com/en/service/lifecycle-management — 107 obsoletos, 106 sin stock — PRIORIDAD'},
+      {id:'s214',t:'🟠 SCHNEIDER / ELAU (301 eq.) → se.com/ww/en/work/support/product-lifecycle-information.jsp — 79 obsoletos sin stock'},
+      {id:'s215',t:'🟢 SEW EURODRIVE (293 eq.) → sew-eurodrive.com/service/product-lifecycle — Sin obsoletos, verificar periódicamente'},
+      {id:'s216',t:'🟢 ABB (124 eq.) → new.abb.com/service/product-service-lifecycle — Sin obsoletos actualmente'},
+      {id:'s217',t:'🟢 ALLEN BRADLEY (106 eq.) → rockwellautomation.com/en-us/support/product-lifecycle.html — Sin obsoletos actualmente'},
+      {id:'s218',t:'🔴 KUKA (23 eq.) → kuka.com/en-de/services/lifecycle-management — 22 de 23 obsoletos SIN STOCK — URGENTE'},
+      {id:'s219',t:'🔴 LEROY SOMER / ELAU (37 eq.) → leroy-somer.com — 26 obsoletos sin stock — Leroy Somer ahora es Nidec'},
+      {id:'s21A',t:'🟢 ENDRESS+HAUSER (31 eq.) → endress.com/en/services/lifecycle-services — Sin obsoletos actualmente'},
+      {id:'s21B',t:'🟢 PILZ / BECKHOFF / OMRON / FESTO → portales propios de cada fabricante — Sin obsoletos actualmente'},
      ],
-     info:'🌐 Portal gratuito: support.industry.siemens.com — Sin contrato requerido'},
-    {id:'s22',title:'Consultar estado de ciclo de vida de cada equipo en SIOS',
-     tags:'',resp:'Ghersi + Edwin',
-     desc:'Buscar cada Código parte (MLFB) del inventario en SIOS para obtener el estado oficial del fabricante. Este paso define el nivel de riesgo real de cada equipo.',
+     info:''},
+    {id:'s22',title:'Consultar estado de ciclo de vida de cada equipo en el portal del fabricante',
+     tag:'',resp:'Ghersi + Edwin',
+     desc:'Buscar cada equipo en el portal de su fabricante para obtener el estado oficial: Active, Classic, Phaseout o Discontinued. Este paso define el riesgo real de cada equipo.',
      subs:[
-      {id:'s221',t:'Buscar cada MLFB en SIOS → obtener estado: Active | Classic | Phaseout | Discontinued'},
-      {id:'s222',t:'Registrar: fecha fin de soporte + producto de reemplazo sugerido (campo Cambio Sugerido en Excel)'},
-      {id:'s223',t:'Guardar URL de la página SIOS en el campo Respaldo del Excel (para trazabilidad y auditorías)'},
-      {id:'s224',t:'Priorizar consulta: primero los 927 Urgente, luego 418 Alta, luego Media y Baja'},
-      {id:'s225',t:'Actualizar campo Obsoleto? y Prioridad Migración en el Excel y recargar al sistema web'},
+      {id:'s221',t:'Para Siemens: buscar por MLFB en SIOS → obtener estado Active | Classic | Phaseout | Discontinued'},
+      {id:'s222',t:'Para B&R: buscar por número de artículo en br-automation.com → verificar los 107 obsoletos registrados'},
+      {id:'s223',t:'Para Schneider/Elau: buscar en se.com por referencia de producto → los 79 obsoletos sin stock'},
+      {id:'s224',t:'Para Danfoss: verificar variadores de frecuencia (FC 300, VLT, etc.) en portal Danfoss → son 1,122 equipos, pocos obsoletos'},
+      {id:'s225',t:'Para KUKA: verificar 22 robots/controladores obsoletos en kuka.com → todos sin stock, URGENTE'},
+      {id:'s226',t:'Registrar para cada equipo: estado CV + fecha fin soporte + producto reemplazo + URL página del fabricante (campo Respaldo en Excel)'},
+      {id:'s227',t:'Actualizar campo Obsoleto? y Prioridad Migración en el Excel y recargar al sistema web'},
      ],
-     warn:'⚠️ Acción inmediata: 927 Discontinued ya identificados. Verificar Cambio Sugerido para críticos de Pucusana (360) y Trujillo (90)'},
+     warn:'⚠️ IMPORTANTE: Danfoss tiene 1,122 equipos pero casi todos son vigentes. B&R tiene 107 obsoletos sin stock — es la segunda urgencia después de Siemens.'},
     {id:'s23',title:'Construir la matriz de riesgo de obsolescencia',
-     tags:'',resp:'Edwin + Meliza',
-     desc:'Cruzar Criticidad × Estado ciclo de vida para generar el mapa de prioridades. El sistema web ya hace esto automáticamente.',
+     tag:'',resp:'Edwin + Meliza',
+     desc:'Cruzar Criticidad × Estado ciclo de vida para todos los fabricantes. El sistema web ya hace esto automáticamente con los datos del Excel.',
      subs:[
-      {id:'s231',t:'🔴 Crítico urgente = Discontinued + Alta → 927 equipos → Acción esta semana'},
-      {id:'s232',t:'🟠 Alto riesgo = Phaseout + Alta/Media → 418 equipos → Plan en 12 meses'},
-      {id:'s233',t:'🟡 Riesgo medio = Classic o Phaseout + Baja → 325 equipos → Monitorear'},
-      {id:'s234',t:'Presentar matriz a Fernando Soca con los números reales de ACL para gestión de presupuesto'},
+      {id:'s231',t:'🔴 SIEMENS Discontinued + Alta → 927 equipos, 642 sin stock — Acción inmediata'},
+      {id:'s232',t:'🟠 B&R obsoletos → 107 equipos, 106 sin stock — Segunda prioridad'},
+      {id:'s233',t:'🟠 SCHNEIDER/ELAU obsoletos → 79 equipos, 79 sin stock — Tercera prioridad'},
+      {id:'s234',t:'🔴 KUKA obsoletos → 22 equipos, 22 sin stock — Prioridad alta (robots de línea)'},
+      {id:'s235',t:'Presentar matriz consolidada por fabricante a Fernando Soca para definir presupuesto por marca'},
      ],
-     info:'✅ Ya disponible: la pestaña Matriz muestra el cruce en tiempo real. Cada celda filtra el inventario automáticamente.'},
+     info:'✅ El sistema web ya muestra esto: pestaña Matriz filtra por fabricante. Clic en celda → inventario filtrado automáticamente.'},
    ]},
   {id:'f3',n:'3',col:'#ef9f27',tcol:'#fff',bg:'#faeeda',tx:'#854f0b',
    title:'Fase 3 — Base de datos: centralizar la información',time:'Semanas 7–10',
    steps:[
     {id:'s31',title:'Decidir dónde vivirá tu base de datos',
-     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#faeeda;color:#854f0b">Decisión clave</span>',
+     tag:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#faeeda;color:#854f0b">Decisión clave</span>',
      resp:'Edwin + Fernando',
-     desc:'ACL ya tiene la decisión tomada: Excel + Sistema web en GitHub Pages. Esta combinación cubre las necesidades sin costo adicional.',
+     desc:'ACL ya tiene la decisión tomada: Excel + Sistema web en GitHub Pages. Sin costo adicional. Aplica para TODOS los fabricantes.',
      subs:[
-      {id:'s311',t:'Solución actual implementada: Excel mensual + Sistema web ACL (GitHub Pages) como visualización y gestión'},
-      {id:'s312',t:'Solución futura: Integrar con SAP PM → clase de características Obsolescencia con campos Estado CV, Fin soporte, Reemplazo'},
+      {id:'s311',t:'Solución actual: Excel mensual + Sistema web ACL (GitHub Pages) — aplica para Siemens, Danfoss, B&R, Schneider y todos los demás'},
+      {id:'s312',t:'El campo "Estado CV" en el Excel puede ser Active/Classic/Phaseout/Discontinued para cualquier fabricante, no solo Siemens'},
       {id:'s313',t:'Definir responsable de actualización mensual del Excel y carga al sistema web — Propuesta: Kevin Silva'},
      ],
-     info:'✅ Decisión tomada: Sistema web ACL en GitHub Pages + Excel unificado mensual. Sin costo de infraestructura.'},
-    {id:'s32',title:'Estructurar la base de datos maestra',
-     tags:'',resp:'Edwin + Kevin',
-     desc:'El Excel ACL ya tiene 33 columnas estructuradas. Ahora hay que completar los campos que faltan y establecer la rutina de mantenimiento.',
+     info:'✅ Decisión tomada: Excel unificado + sistema web. La lógica de riesgo aplica igual a Siemens, B&R, Schneider, etc.'},
+    {id:'s32',title:'Estructurar la base de datos maestra — completar campos vacíos',
+     tag:'',resp:'Edwin + Kevin',
+     desc:'Completar los campos que faltan, especialmente para los equipos no-Siemens donde el lifecycle no se ha consultado aún.',
      subs:[
-      {id:'s321',t:'Completar campo Responsable para todos los equipos (actualmente solo 300 de 5,663 tienen responsable = 5%)'},
-      {id:'s322',t:'Completar campo Fecha de actualización para todos los registros (actualmente solo 15 tienen fecha)'},
-      {id:'s323',t:'Completar Monto estimado de reemplazo para los 927 Discontinued (necesario para gestión presupuestal con Fernando)'},
-      {id:'s324',t:'Completar Comentario de obsolescencia para equipos sin notas'},
+      {id:'s321',t:'Completar campo Responsable para todos los equipos — priorizar los 274 obsoletos no-Siemens (B&R + Schneider + KUKA + Leroy Somer + Elau)'},
+      {id:'s322',t:'Completar campo Estado CV para los equipos no-Siemens con el dato obtenido en cada portal de fabricante'},
+      {id:'s323',t:'Completar Monto estimado de reemplazo — cotizar B&R, Schneider y KUKA además de los Siemens'},
+      {id:'s324',t:'Completar Comentario de obsolescencia y Cambio Sugerido para los 274 obsoletos no-Siemens'},
       {id:'s325',t:'Rutina mensual: actualizar Excel el primer lunes de cada mes → cargar nuevo index.html al sistema web'},
      ],
-     warn:'⚠️ Campos críticos incompletos hoy: Responsable solo 5% · Monto estimado solo 2 de 1,670 · Fecha actualización solo 15 registros'},
-    {id:'s33',title:'Conectar mySupport para actualizaciones automáticas',
-     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#eaf3de;color:#3b6d11">Gratis</span>',
+     warn:'⚠️ Los 274 obsoletos no-Siemens (B&R 107 + Schneider 79 + KUKA 22 + Leroy Somer 16 + Elau 10 + otros) no tienen Cambio Sugerido completo en el Excel actual.'},
+    {id:'s33',title:'Configurar alertas de ciclo de vida por fabricante',
+     tag:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#eaf3de;color:#3b6d11">Gratis</span>',
      resp:'Edwin',
-     desc:'mySupport envía alertas por email cuando un producto cambia de estado. Garantiza que el sistema siempre esté actualizado sin revisiones manuales.',
+     desc:'Cada fabricante tiene su sistema de alertas. Configurar todos para que ACL reciba notificación automática cuando un equipo cambia de estado.',
      subs:[
-      {id:'s331',t:'Agregar todos los MLFB Siemens a la lista de seguimiento de mySupport (empezar por los 927 Urgente)'},
-      {id:'s332',t:'Cuando llegue alerta de mySupport → actualizar Estado CV en el Excel → recargar al sistema web'},
-      {id:'s333',t:'Futuro (Fase 4): Power Automate → email de mySupport actualiza automáticamente SharePoint o SAP PM'},
+      {id:'s331',t:'SIEMENS: activar mySupport para todos los MLFB del inventario → alertas automáticas por email'},
+      {id:'s332',t:'B&R: registrar en br-automation.com → activar notificaciones de lifecycle para los 352 equipos B&R'},
+      {id:'s333',t:'SCHNEIDER: registrar en se.com → activar alertas para los 301 equipos Schneider/Elau'},
+      {id:'s334',t:'DANFOSS: registrar en myDrive (portal Danfoss) → configurar alertas para los 1,122 variadores'},
+      {id:'s335',t:'Cuando llegue cualquier alerta → actualizar Estado CV en el Excel → recargar al sistema web'},
      ],
-     info:'🌐 Portal: support.industry.siemens.com/My/ — Alertas automáticas gratuitas para equipos Siemens'},
+     info:''},
    ]},
   {id:'f4',n:'4',col:'#a855f7',tcol:'#fff',bg:'#f3e8ff',tx:'#7e22ce',
    title:'Fase 4 — Plan de acción: atacar los rojos y naranjas',time:'Mes 3 en adelante',
    steps:[
-    {id:'s41',title:'Generar plan de migración por prioridad',
-     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#fcebeb;color:#a32d2d">Urgente</span>',
+    {id:'s41',title:'Generar plan de migración por prioridad — todos los fabricantes',
+     tag:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#fcebeb;color:#a32d2d">Urgente</span>',
      resp:'Edwin + Kevin',
-     desc:'Crear un plan detallado para cada equipo 🔴 y 🟠, con reemplazo definido, fecha, responsable técnico y presupuesto. Sincronizar con paradas programadas de cada planta.',
+     desc:'Plan detallado por fabricante, con reemplazo definido, fecha, responsable técnico y presupuesto. Sincronizar con paradas programadas de cada planta.',
      subs:[
-      {id:'s411',t:'Filtrar en el sistema web: 🔴 Críticos + sin stock → esta es la lista de máxima urgencia (filtro Sin stock + riesgo Crítico urgente)'},
-      {id:'s412',t:'Para cada equipo crítico: definir reemplazo exacto con referencia técnica del fabricante y conseguir cotización con Compras'},
-      {id:'s413',t:'Usar TIA Migration Tool para proyectos STEP 7 (S7-300/400) → evaluar esfuerzo de migración a S7-1500 antes de comprometer fecha'},
-      {id:'s414',t:'Asignar en el sistema web: Responsable ACL + Fecha migración planificada + Notas para cada equipo del plan'},
+      {id:'s411',t:'SIEMENS (927 disc.): S7-300/400 → S7-1500 con TIA Migration Tool · OP/TP → Comfort Panel/Unified · ET200 → ET200SP · Pucusana primero'},
+      {id:'s412',t:'B&R (107 obs., 106 sin stock): verificar en br-automation.com reemplazo exacto para cada modelo · X20 series es la plataforma vigente de B&R'},
+      {id:'s413',t:'SCHNEIDER/ELAU (79 obs., 79 sin stock): los Elau PacDrive → Lexium MC Multi-Axis · Coordinar con proveedor Schneider local'},
+      {id:'s414',t:'KUKA (22 obs., 22 sin stock): robots y controladores KR C2/C3 → KR C4 · Requiere programación y recalibración · Tiempo estimado: 2-4 semanas por robot'},
+      {id:'s415',t:'Asignar en el sistema web: Responsable ACL + Fecha migración + Reemplazo confirmado + Costo por cada equipo del plan'},
      ],
-     warn:'🚨 Prioridad máxima: Pucusana tiene 360 críticos sin stock. Iniciar plan esta semana con Ghersi Chang.'},
-    {id:'s42',title:'Gestión de compras urgente — 916 equipos sin stock',
-     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#fcebeb;color:#a32d2d">Urgente</span>',
+     warn:'🚨 Prioridad inmediata por fabricante: Siemens (642 sin stock) → B&R (106 sin stock) → Schneider (79 sin stock) → KUKA (22 sin stock)'},
+    {id:'s42',title:'Gestión de compras urgente — 916 equipos sin stock (todos los fabricantes)',
+     tag:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#fcebeb;color:#a32d2d">Urgente</span>',
      resp:'Miguel MRO + Compras',
-     desc:'Los 916 equipos obsoletos sin stock son el mayor riesgo operacional. Si alguno falla antes de ser reemplazado, no hay repuesto disponible en almacén.',
+     desc:'Los 916 equipos sin stock incluyen múltiples fabricantes. Cada uno requiere cotizar con su proveedor correspondiente en Perú.',
      subs:[
-      {id:'s421',t:'Exportar lista de 916 sin stock desde el sistema web (filtro Obs. sin stock) → enviar a Compras con código SAP y costo estimado'},
-      {id:'s422',t:'Priorizar: Lote 1 → 360 sin stock Pucusana · Lote 2 → 90 Trujillo · Lote 3 → Zárate, Arequipa, Cuzco, Iquitos'},
-      {id:'s423',t:'Para Discontinued: evaluar si comprar repuesto original last-time-buy o directamente el equipo de reemplazo nuevo'},
-      {id:'s424',t:'Actualizar Stock fisico Almacen y Disponibilidad final en el Excel al recibir cada compra → recargar al sistema web'},
+      {id:'s421',t:'SIEMENS (642 sin stock): cotizar con representante Siemens Perú → algunos modelos tienen last-time-buy con fecha límite'},
+      {id:'s422',t:'B&R (106 sin stock): cotizar con distribuidor B&R en Perú → verificar disponibilidad de modelos X20 para reemplazo'},
+      {id:'s423',t:'SCHNEIDER/ELAU (79 sin stock): cotizar con Schneider Electric Perú → Elau obsoleto puede requerir PacDrive 3 como reemplazo'},
+      {id:'s424',t:'KUKA (22 sin stock): contactar KUKA Robotics → los controladores KRC requieren técnicos especializados para migración'},
+      {id:'s425',t:'LEROY SOMER/ELAU (26 sin stock): cotizar con Nidec/Leroy Somer Perú → algunos motores pueden ser sustituidos por equivalentes ABB o WEG'},
      ],
      info:''},
     {id:'s43',title:'Ejecutar migraciones en paradas programadas',
-     tags:'',resp:'Ghersi + Edwin + Técnicos planta',
-     desc:'Las migraciones deben coordinarse con producción. Kevin coordina las fechas con mínimo 4 semanas de anticipación.',
+     tag:'',resp:'Ghersi + Edwin + Técnicos planta',
+     desc:'Las migraciones deben coordinarse con producción. Cada fabricante requiere conocimientos técnicos específicos — algunos pueden necesitar soporte del OEM.',
      subs:[
-      {id:'s431',t:'Pucusana (sep 2026): PLCs S7-300/400 → S7-1500 · HMIs → WinCC Unified · Coordinar con parada general de planta'},
-      {id:'s432',t:'Trujillo (sep-oct 2026): 90 equipos críticos · Coordinar con Jefe de Mantenimiento Trujillo'},
-      {id:'s433',t:'Zárate, Arequipa, Cuzco, Iquitos (oct-nov 2026): Menor volumen — planificar en paradas menores de cada planta'},
-      {id:'s434',t:'Tras cada migración: actualizar Obsoleto = No y Estado CV = Active en el Excel + recargar al sistema web'},
+      {id:'s431',t:'Siemens S7 (sep-oct 2026): TIA Portal + TIA Migration Tool · Soporte Siemens Perú para casos complejos'},
+      {id:'s432',t:'B&R (oct-nov 2026): Automation Studio para programación · Verificar compatibilidad de software con nuevos módulos X20'},
+      {id:'s433',t:'Schneider/Elau PacDrive (oct-nov 2026): SoMachine/EcoStruxure para programación · Soporte Schneider Electric Perú'},
+      {id:'s434',t:'KUKA robots (según disponibilidad): WorkVisual para programación · Requiere recalibración completa del robot tras migrar'},
+      {id:'s435',t:'Tras cada migración: actualizar Obsoleto = No y Estado CV = Active en el Excel + recargar al sistema web'},
      ],
-     info:'🔧 Herramienta: TIA Portal + TIA Migration Tool + Siemens Upgrade Service para casos complejos'},
+     info:'🔧 Herramientas por fabricante: Siemens → TIA Portal · B&R → Automation Studio · Schneider → EcoStruxure · KUKA → WorkVisual'},
     {id:'s44',title:'Crear dashboard de seguimiento para Fernando Soca',
-     tags:'',resp:'Edwin',
-     desc:'Revisión mensual con evidencia visual del avance: equipos migrados, reducción de riesgo, gasto ejecutado vs. presupuesto aprobado.',
+     tag:'',resp:'Edwin',
+     desc:'Revisión mensual con evidencia visual del avance por fabricante: equipos migrados, reducción de riesgo, gasto ejecutado.',
      subs:[
-      {id:'s441',t:'Revisión mensual con Fernando: presentar pestaña Dashboard del sistema web con KPIs y filtros por planta'},
-      {id:'s442',t:'KPIs a reportar: N° migraciones ejecutadas · Reducción de Discontinued · Sin stock resueltos · Presupuesto ejecutado'},
-      {id:'s443',t:'Meta diciembre 2026: Discontinued reducido de 927 a menos de 200 · Sin stock reducido de 916 a menos de 300'},
+      {id:'s441',t:'Revisión mensual con Fernando: presentar pestaña Dashboard del sistema web — KPIs y filtros por planta'},
+      {id:'s442',t:'Reportar avance por fabricante: Siemens · B&R · Schneider · KUKA — cada uno con N° migrados y N° pendientes'},
+      {id:'s443',t:'Meta dic 2026: Siemens Discontinued < 200 · B&R sin stock < 30 · Schneider sin stock < 20 · KUKA sin stock = 0'},
      ],
      info:''},
     {id:'s45',title:'Establecer rutina permanente de mantenimiento del sistema',
-     tags:'',resp:'Kevin + Edwin',
-     desc:'El sistema solo funciona si se mantiene actualizado. La rutina garantiza visibilidad de obsolescencia de forma permanente en ACL.',
+     tag:'',resp:'Kevin + Edwin',
+     desc:'El sistema solo funciona si se mantiene actualizado para TODOS los fabricantes, no solo Siemens.',
      subs:[
-      {id:'s451',t:'Mensual (Kevin): Revisar alertas mySupport + actualizar Excel + cargar nuevo index.html al sistema web'},
-      {id:'s452',t:'Al instalar equipo nuevo: agregar al Excel ese mismo día — Jefe de planta notifica a Edwin o Kevin'},
-      {id:'s453',t:'Trimestral (Edwin): Revisar avance del plan de migración con cada jefe de planta'},
-      {id:'s454',t:'Anual (Edwin + Fernando): Auditoría completa del inventario + definir plan y presupuesto del siguiente año'},
-      {id:'s455',t:'Futuro: Integrar con Senseye → cruzar predicción de fallo con riesgo de obsolescencia para mantenimiento proactivo total'},
+      {id:'s451',t:'Mensual: revisar alertas de TODOS los portales (SIOS Siemens + B&R + Schneider + Danfoss) + actualizar Excel + cargar al sistema web'},
+      {id:'s452',t:'Al instalar equipo nuevo (cualquier marca): agregar al Excel ese mismo día con fabricante, modelo y código de producto'},
+      {id:'s453',t:'Trimestral: revisar avance del plan de migración con cada jefe de planta — reportar por fabricante'},
+      {id:'s454',t:'Anual: auditoría completa + definir plan y presupuesto del siguiente año por fabricante'},
+      {id:'s455',t:'Futuro: integrar con Senseye → cruzar predicción de fallo con riesgo de obsolescencia de cualquier fabricante'},
      ],
      info:''},
    ]},
   ];
 
-  /* ── BUILD HTML ── */
   let phaseHTML='';
   PHASES.forEach(ph=>{
     let stepsHTML='';
     ph.steps.forEach(st=>{
-      const chkStyle=S[st.id]?'background:#4ade80;border-color:#4ade80;color:#fff':'background:transparent;border-color:var(--bd2);color:transparent';
-      const lblStyle=S[st.id]?'text-decoration:line-through;color:var(--tx2)':'color:var(--tx)';
+      const cSt=S[st.id]?'background:#4ade80;border-color:#4ade80;color:#fff':'background:transparent;border-color:var(--bd2);color:transparent';
+      const lSt=S[st.id]?'text-decoration:line-through;color:var(--tx2)':'color:var(--tx)';
       let subsHTML='';
       (st.subs||[]).forEach(ss=>{
-        const sChk=S[ss.id]?'background:#4ade80;border-color:#4ade80;color:#fff':'background:transparent;border-color:var(--bd2);color:transparent';
-        const sTxt=S[ss.id]?'text-decoration:line-through;color:var(--tx3)':'';
-        subsHTML+=`
-          <div onclick="toggleSub('${ss.id}')" style="display:flex;gap:7px;align-items:flex-start;padding:5px 6px;border-radius:5px;cursor:pointer;font-size:12px;color:var(--tx2)" onmouseenter="this.style.background='var(--s2)'" onmouseleave="this.style.background='transparent'">
-            <div id="ck${ss.id}" style="width:14px;height:14px;border-radius:3px;border:1.5px solid;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;transition:all .2s;${sChk}">✓</div>
-            <span id="lb${ss.id}" style="${sTxt}">${ss.t}</span>
-          </div>`;
+        const cSs=S[ss.id]?'background:#4ade80;border-color:#4ade80;color:#fff':'background:transparent;border-color:var(--bd2);color:transparent';
+        const lSs=S[ss.id]?'text-decoration:line-through;color:var(--tx3)':'';
+        subsHTML+=`<div onclick="toggleSub('${ss.id}')" style="display:flex;gap:7px;align-items:flex-start;padding:5px 6px;border-radius:5px;cursor:pointer;font-size:12px;color:var(--tx2)" onmouseenter="this.style.background='var(--s2)'" onmouseleave="this.style.background='transparent'">
+          <div id="ck${ss.id}" style="width:14px;height:14px;border-radius:3px;border:1.5px solid;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;transition:all .2s;${cSs}">✓</div>
+          <span id="lb${ss.id}" style="${lSs}">${ss.t}</span></div>`;
       });
-      const infoBox=st.info?`<div style="background:#ddeeff;border:0.5px solid #4a9eff;border-radius:7px;padding:9px 12px;margin-top:8px;font-size:12px;color:#0c3d72">${st.info}</div>`:'';
-      const warnBox=st.warn?`<div style="background:#fcebeb;border:0.5px solid #e24b4a;border-radius:7px;padding:9px 12px;margin-top:8px;font-size:12px;color:#a32d2d">${st.warn}</div>`:'';
-      stepsHTML+=`
-        <div id="wpst-${st.id}" style="padding:14px 16px;border-bottom:0.5px solid #f0efe9">
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <div id="ck${st.id}" onclick="toggleTask('${st.id}')" style="width:20px;height:20px;border-radius:5px;border:1.5px solid;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:2px;font-size:11px;font-weight:700;transition:all .2s;${chkStyle}">✓</div>
-            <div style="flex:1">
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px">
-                <span id="lb${st.id}" style="font-size:13px;font-weight:500;${lblStyle}">${st.title}</span>
-                ${st.tags}
-                ${st.resp?`<span style="background:#ddeeff;color:#0c3d72;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:500">${st.resp}</span>`:''}
-              </div>
-              <p style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:${subsHTML?'7px':'0'}">${st.desc}</p>
-              ${subsHTML?`<div style="display:flex;flex-direction:column;gap:3px;margin-top:6px">${subsHTML}</div>`:''}
-              ${infoBox}${warnBox}
-            </div>
-          </div>
-        </div>`;
-    });
-
-    phaseHTML+=`
-      <div style="border:0.5px solid var(--bd);border-radius:10px;margin-bottom:12px;overflow:hidden;background:var(--s1)">
-        <div onclick="(function(){const b=document.getElementById('wpb-${ph.id}');const c=document.getElementById('wpc-${ph.id}');if(b&&c){const op=b.style.display!=='none';b.style.display=op?'none':'block';c.textContent=op?'▾':'▴';}})()" style="padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer" onmouseenter="this.style.background='var(--s2)'" onmouseleave="this.style.background='transparent'">
-          <div style="width:32px;height:32px;border-radius:50%;background:${ph.col};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:${ph.tcol};flex-shrink:0">${ph.n}</div>
+      const info=st.info?`<div style="background:#ddeeff;border:0.5px solid #4a9eff;border-radius:7px;padding:9px 12px;margin-top:8px;font-size:12px;color:#0c3d72">${st.info}</div>`:'';
+      const warn=st.warn?`<div style="background:#fcebeb;border:0.5px solid #e24b4a;border-radius:7px;padding:9px 12px;margin-top:8px;font-size:12px;color:#a32d2d">${st.warn}</div>`:'';
+      stepsHTML+=`<div style="padding:14px 16px;border-bottom:0.5px solid #f0efe9">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div id="ck${st.id}" onclick="toggleTask('${st.id}')" style="width:20px;height:20px;border-radius:5px;border:1.5px solid;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:2px;font-size:11px;font-weight:700;transition:all .2s;${cSt}">✓</div>
           <div style="flex:1">
-            <div style="font-size:14px;font-weight:600;color:var(--tx)">${ph.title}</div>
-            <div style="font-size:11px;color:var(--tx2);margin-top:2px">
-              <span style="background:var(--s2);padding:1px 7px;border-radius:8px;font-size:10px;border:0.5px solid var(--bd)">⏱ ${ph.time}</span>
-              &nbsp; ${ph.steps.length} pasos
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px">
+              <span id="lb${st.id}" style="font-size:13px;font-weight:500;${lSt}">${st.title}</span>
+              ${st.tag||''}
+              ${st.resp?`<span style="background:#ddeeff;color:#0c3d72;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:500">${st.resp}</span>`:''}
             </div>
+            <p style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:${subsHTML?'7px':'0'}">${st.desc}</p>
+            ${subsHTML?`<div style="display:flex;flex-direction:column;gap:3px;margin-top:6px">${subsHTML}</div>`:''}
+            ${info}${warn}
           </div>
-          <span id="wpbd-${ph.id}" style="font-size:11px;padding:2px 9px;border-radius:8px;font-weight:600;background:${ph.bg};color:${ph.tx};flex-shrink:0">0/${ph.steps.length}</span>
-          <span id="wppct-${ph.id}" style="font-size:12px;font-weight:700;min-width:34px;text-align:right;color:${ph.col}">0%</span>
-          <span id="wpc-${ph.id}" style="color:var(--tx3);font-size:18px;flex-shrink:0">▴</span>
-        </div>
-        <div id="wpb-${ph.id}" style="border-top:0.5px solid var(--bd)">
-          <div style="padding:9px 16px;background:var(--s2);border-bottom:0.5px solid var(--bd);display:flex;align-items:center;gap:10px">
-            <span style="font-size:10px;color:var(--tx2)">Progreso fase</span>
-            <div style="flex:1;height:5px;background:var(--bd);border-radius:3px;overflow:hidden">
-              <div id="wpfp-${ph.id}" style="height:100%;width:0%;border-radius:3px;background:${ph.col};transition:width .4s"></div>
-            </div>
-            <span id="wpfpp-${ph.id}" style="font-size:10px;font-weight:600;color:${ph.col}">0%</span>
-          </div>
-          ${stepsHTML}
         </div>
       </div>`;
+    });
+    phaseHTML+=`<div style="border:0.5px solid var(--bd);border-radius:10px;margin-bottom:12px;overflow:hidden;background:var(--s1)">
+      <div onclick="(function(){const b=document.getElementById('wpb-${ph.id}');const c=document.getElementById('wpc-${ph.id}');if(b&&c){const op=b.style.display!=='none';b.style.display=op?'none':'block';c.textContent=op?'▾':'▴';}})()" style="padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer" onmouseenter="this.style.background='var(--s2)'" onmouseleave="this.style.background='transparent'">
+        <div style="width:32px;height:32px;border-radius:50%;background:${ph.col};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:${ph.tcol};flex-shrink:0">${ph.n}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600;color:var(--tx)">${ph.title}</div>
+          <div style="font-size:11px;color:var(--tx2);margin-top:2px">
+            <span style="background:var(--s2);padding:1px 7px;border-radius:8px;font-size:10px;border:0.5px solid var(--bd)">⏱ ${ph.time}</span>
+            &nbsp;${ph.steps.length} pasos
+          </div>
+        </div>
+        <span id="wpbd-${ph.id}" style="font-size:11px;padding:2px 9px;border-radius:8px;font-weight:600;background:${ph.bg};color:${ph.tx};flex-shrink:0">0/${ph.steps.length}</span>
+        <span id="wppct-${ph.id}" style="font-size:12px;font-weight:700;min-width:34px;text-align:right;color:${ph.col}">0%</span>
+        <span id="wpc-${ph.id}" style="color:var(--tx3);font-size:18px;flex-shrink:0">▴</span>
+      </div>
+      <div id="wpb-${ph.id}" style="border-top:0.5px solid var(--bd)">
+        <div style="padding:9px 16px;background:var(--s2);border-bottom:0.5px solid var(--bd);display:flex;align-items:center;gap:10px">
+          <span style="font-size:10px;color:var(--tx2)">Progreso fase</span>
+          <div style="flex:1;height:5px;background:var(--bd);border-radius:3px;overflow:hidden">
+            <div id="wpfp-${ph.id}" style="height:100%;width:0%;border-radius:3px;background:${ph.col};transition:width .4s"></div>
+          </div>
+          <span id="wpfpp-${ph.id}" style="font-size:10px;font-weight:600;color:${ph.col}">0%</span>
+        </div>
+        ${stepsHTML}
+      </div>
+    </div>`;
   });
 
-  const ganttRows=[
-    ['Fase 1 · Inventario',           '#4ade80',[1,0,0,0,0,0]],
-    ['Fase 2 · Diagnóstico SIOS',      '#4a9eff',[1,1,0,0,0,0]],
-    ['Fase 3 · Base de datos',         '#ef9f27',[0,1,1,0,0,0]],
-    ['Fase 4 · Compras urgentes',      '#a855f7',[0,1,1,0,0,0]],
-    ['Migraciones Pucusana',           '#e24b4a',[0,0,1,0,0,0]],
-    ['Migraciones Trujillo',           '#e24b4a',[0,0,1,1,0,0]],
-    ['Resto de plantas',               '#e24b4a',[0,0,0,1,1,0]],
-    ['Senseye + Rutinas permanentes',  '#a855f7',[0,0,0,0,1,1]],
-    ['Revisiones con Fernando Soca',   '#1760a8',[0,1,0,1,0,1]],
-  ].map(([l,c,cols])=>`<tr><td style="padding:5px 8px;border-bottom:0.5px solid var(--bd);font-size:11px">${l}</td>${cols.map(on=>on?`<td style="padding:3px 5px;border-bottom:0.5px solid var(--bd)"><div style="height:16px;border-radius:3px;background:${c};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff">▌</div></td>`:`<td style="border-bottom:0.5px solid var(--bd)"></td>`).join('')}</tr>`).join('');
+  // Tabla de fabricantes
+  let marcasHTML=MARCAS.map(m=>{
+    const riesgo=m.ss>50?'🔴':m.ss>10?'🟠':m.obs>0?'🟡':'🟢';
+    return `<tr>
+      <td style="padding:7px 9px;border-bottom:0.5px solid var(--bd);font-weight:500">${m.m}</td>
+      <td style="padding:7px 9px;border-bottom:0.5px solid var(--bd);text-align:center">${m.tot.toLocaleString()}</td>
+      <td style="padding:7px 9px;border-bottom:0.5px solid var(--bd);text-align:center;color:${m.obs>0?'#854f0b':'var(--tx2)'};font-weight:${m.obs>0?'600':'400'}">${m.obs||'—'}</td>
+      <td style="padding:7px 9px;border-bottom:0.5px solid var(--bd);text-align:center;color:${m.ss>0?'#a32d2d':'var(--tx2)'};font-weight:${m.ss>0?'600':'400'}">${m.ss||'—'}</td>
+      <td style="padding:7px 9px;border-bottom:0.5px solid var(--bd);text-align:center">${riesgo}</td>
+      <td style="padding:7px 9px;border-bottom:0.5px solid var(--bd);font-size:11px;color:var(--ac)"><a href="https://${m.portal}" target="_blank" style="color:var(--ac)">${m.tool}</a></td>
+    </tr>`;
+  }).join('');
 
   app.innerHTML=`
     <div style="background:linear-gradient(135deg,#0b1d3a,#163364);color:#fff;border-radius:12px;padding:28px 32px;margin-bottom:18px">
       <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#4a9eff;margin-bottom:8px">JEFATURA NACIONAL DE MANTENIMIENTO — ACL</div>
       <div style="font-size:22px;font-weight:700;margin-bottom:6px">Plan de Trabajo — Gestión de Obsolescencia Electrónica</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.65)">Arca Continental Lindley · 6 plantas · Perú · Julio – Diciembre 2026</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.65)">Arca Continental Lindley · 6 plantas · 15+ fabricantes · Perú · Julio – Diciembre 2026</div>
       <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;font-size:11px">
         <span style="color:rgba(255,255,255,.5)">Responsable: <strong style="color:#fff">Edwin Ampuero</strong></span>
         <span style="color:rgba(255,255,255,.5)">Aprueba: <strong style="color:#fff">Fernando Soca</strong></span>
@@ -560,21 +586,39 @@ function renderWorkPlan(app,all){
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:16px">
-      ${[['5,663','Total equipos','var(--tx)'],['1,670','Obsoletos','#854f0b'],['927','Discontinued','#a32d2d'],['418','Phaseout','#854f0b'],['916','Sin stock','#a32d2d'],['754','Con stock','#3b6d11']].map(([v,l,c])=>`
+      ${[['5,663','Total equipos','var(--tx)'],['1,670','Obsoletos','#854f0b'],['927','Siemens Disc.','#a32d2d'],['274','Otros fabr. obs.','#854f0b'],['916','Sin stock','#a32d2d'],['754','Con stock','#3b6d11']].map(([v,l,c])=>`
       <div style="background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:10px;text-align:center">
-        <div style="font-size:22px;font-weight:700;color:${c};line-height:1;margin-bottom:3px">${v}</div>
+        <div style="font-size:20px;font-weight:700;color:${c};line-height:1;margin-bottom:3px">${v}</div>
         <div style="font-size:10px;color:var(--tx2)">${l}</div>
       </div>`).join('')}
     </div>
 
+    <!-- TABLA FABRICANTES -->
+    <div style="background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:18px">
+      <p style="font-size:13px;font-weight:600;margin-bottom:12px">🏭 Inventario por fabricante — Portal de ciclo de vida de cada uno</p>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr>
+            <th style="padding:7px 9px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:left">Fabricante</th>
+            <th style="padding:7px 9px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:center">Total</th>
+            <th style="padding:7px 9px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:center">Obsoletos</th>
+            <th style="padding:7px 9px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:center">Sin stock</th>
+            <th style="padding:7px 9px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:center">Riesgo</th>
+            <th style="padding:7px 9px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:left">Portal de ciclo de vida</th>
+          </tr></thead>
+          <tbody>${marcasHTML}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PROGRESO -->
     <div style="background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:18px">
       <div style="font-size:12px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between">
         <span>Progreso general del plan</span>
         <span id="wpgpct" style="color:var(--ac);font-weight:700">0%</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">
-        ${PHASES.map(ph=>`
-        <div onclick="(function(){const b=document.getElementById('wpb-${ph.id}');if(b){const op=b.style.display!=='none';b.style.display=op?'none':'block';}})()" style="border-radius:8px;padding:10px;text-align:center;cursor:pointer;background:${ph.bg};border:0.5px solid ${ph.tx}">
+        ${PHASES.map(ph=>`<div onclick="(function(){const b=document.getElementById('wpb-${ph.id}');if(b){const op=b.style.display!=='none';b.style.display=op?'none':'block';}})()" style="border-radius:8px;padding:10px;text-align:center;cursor:pointer;background:${ph.bg};border:0.5px solid ${ph.tx}">
           <div id="wppm-${ph.id}" style="font-size:18px;font-weight:700;color:${ph.tx};line-height:1;margin-bottom:2px">0%</div>
           <div style="font-size:10px;font-weight:600;color:${ph.tx}">Fase ${ph.n}</div>
           <div style="font-size:9px;color:${ph.tx};margin-top:2px;opacity:.75">${['Inventario','Diagnóstico','Base de datos','Plan de acción'][parseInt(ph.n)-1]}</div>
@@ -589,21 +633,8 @@ function renderWorkPlan(app,all){
 
     ${phaseHTML}
 
-    <div style="background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:14px 16px;margin-top:8px">
-      <p style="font-size:13px;font-weight:600;margin-bottom:10px">📅 Cronograma — Julio a Diciembre 2026</p>
-      <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:11px">
-          <thead><tr>
-            <th style="padding:5px 8px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:left;min-width:200px">Actividad</th>
-            ${['Jul','Ago','Sep','Oct','Nov','Dic'].map(m=>`<th style="padding:5px 8px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:center;min-width:65px">${m} 2026</th>`).join('')}
-          </tr></thead>
-          <tbody>${ganttRows}</tbody>
-        </table>
-      </div>
-    </div>
-
     <p style="font-size:11px;color:var(--tx3);text-align:center;margin-top:1.5rem;padding-top:1rem;border-top:0.5px solid var(--bd)">
-      Plan de Trabajo · ACL · Gestión Obsolescencia Electrónica · Julio 2026
+      Plan de Trabajo · ACL · Gestión Obsolescencia Electrónica · 15+ fabricantes · Julio 2026
     </p>`;
 
   recalc();
