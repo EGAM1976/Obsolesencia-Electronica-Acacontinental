@@ -259,389 +259,354 @@ function renderDetail(e){
 
 
 
+
 function renderWorkPlan(app,all){
-  const obs=all.filter(e=>e.ob==='si').length;
 
-  /* ── state ── */
+  /* ── persistence ── */
   let S={};
-  try{S=JSON.parse(localStorage.getItem('wp3')||'{}');}catch{}
-  const save=()=>{try{localStorage.setItem('wp3',JSON.stringify(S));}catch{}};
+  try{S=JSON.parse(localStorage.getItem('wp4')||'{}');}catch{}
+  const save=()=>{try{localStorage.setItem('wp4',JSON.stringify(S));}catch{}};
 
+  function toggleTask(id){
+    S[id]=!S[id]; save();
+    const chk=document.getElementById('ck'+id);
+    const lbl=document.getElementById('lb'+id);
+    if(chk){chk.style.background=S[id]?'#4ade80':'transparent';chk.style.borderColor=S[id]?'#4ade80':'var(--bd2)';chk.style.color=S[id]?'#fff':'transparent';}
+    if(lbl){lbl.style.textDecoration=S[id]?'line-through':'none';lbl.style.color=S[id]?'var(--tx2)':'var(--tx)';}
+    recalc();
+  }
+  function toggleSub(id){
+    S[id]=!S[id]; save();
+    const chk=document.getElementById('ck'+id);
+    const lbl=document.getElementById('lb'+id);
+    if(chk){chk.style.background=S[id]?'#4ade80':'transparent';chk.style.borderColor=S[id]?'#4ade80':'var(--bd2)';chk.style.color=S[id]?'#fff':'transparent';}
+    if(lbl){lbl.style.textDecoration=S[id]?'line-through':'none';}
+  }
+
+  const PIDS={f1:['s11','s12','s13'],f2:['s21','s22','s23'],f3:['s31','s32','s33'],f4:['s41','s42','s43','s44','s45']};
+  function recalc(){
+    let gt=0,gd=0;
+    Object.entries(PIDS).forEach(([pid,sids])=>{
+      const d=sids.filter(id=>S[id]).length, t=sids.length;
+      const pct=t?Math.round(d/t*100):0;
+      ['wppm-'+pid,'wppct-'+pid].forEach(eid=>{const e=document.getElementById(eid);if(e)e.textContent=pct+'%';});
+      const fp=document.getElementById('wpfp-'+pid);if(fp)fp.style.width=pct+'%';
+      const bd=document.getElementById('wpbd-'+pid);if(bd)bd.textContent=d+'/'+t;
+      gt+=t;gd+=d;
+    });
+    const g=gt?Math.round(gd/gt*100):0;
+    const gp=document.getElementById('wpgpct');if(gp)gp.textContent=g+'%';
+    const gb=document.getElementById('wpgbar');if(gb)gb.style.width=g+'%';
+  }
+
+  /* ── DATA ── */
   const PHASES=[
-    {id:'p1',col:'#4ade80',bg:'#eaf3de',tx:'#3b6d11',n:'1',title:'Fase 1 — Inventario: saber qué tienes',timing:'Semanas 1–3',
-     steps:[
-       {id:'s11',title:'Listar todas las plantas y líneas de producción',tags:[{t:'Inicio',c:'#eaf3de',tc:'#3b6d11'}],resp:'Edwin + Jefes planta',
-        desc:'Crear el mapa completo de ACL: 6 plantas, líneas por planta y áreas. Es la columna vertebral de todo el inventario.',
-        subs:[
-          {id:'s111',t:'Confirmar las 6 plantas con códigos SAP: Pucusana (1040) · Trujillo (5040) · Zárate (2000) · Arequipa (7000) · Cuzco (7010) · Iquitos (6300)'},
-          {id:'s112',t:'Levantar número de líneas de producción por planta con cada jefe de mantenimiento'},
-          {id:'s113',t:'Definir áreas: Tableros eléctricos · Paneles de control · Sala de instrumentación · SCADA'},
-          {id:'s114',t:'Crear Excel base: Planta | Centro | Línea | Área | Denominación U.T.'},
-        ],
-        info:'✅ ACL ya tiene esto: 5,663 equipos · Pucusana (3,926) · Trujillo (984) · Zárate (304) · Arequipa (236) · Cuzco (119) · Iquitos (94)'},
-       {id:'s12',title:'Levantar inventario de equipos electrónicos por planta',tags:[],resp:'Edwin + Ghersi',
-        desc:'Recorrer físicamente cada tablero y panel. Fotografiar cada equipo. Registrar todos los datos técnicos necesarios para SIOS.',
-        subs:[
-          {id:'s121',t:'Registrar: Tipo componente | Marca | Modelo | Código parte MLFB | N° SAP Montaje | N° SAP Componente'},
-          {id:'s122',t:'Capturar: Familia | Código Obsolescencia | Cantidad | N° de serie | Año fabricación/instalación'},
-          {id:'s123',t:'Registrar SAP MORTIZ y descripción MORTIZ para equipos con mantenimiento mayor'},
-          {id:'s124',t:'Verificar stock físico en almacén por planta y cruzar con SAP (Stock almacén · Stock en curso · Disponibilidad final)'},
-          {id:'s125',t:'Consolidar en Excel unificado con los 33 campos del formato ACL y cargar al sistema web'},
-        ],
-        warn:'⚠️ Verificar: Cobertura al 100% de líneas en cada planta. Ghersi Chang tiene 300 equipos con responsable asignado.'},
-       {id:'s13',title:'Priorizar equipos críticos (no todo es igual)',tags:[{t:'Decisión clave',c:'#faeeda',tc:'#854f0b'}],resp:'Meliza + Edwin',
-        desc:'Asignar criticidad según impacto en producción. Los equipos de Criticidad Alta son la primera prioridad absoluta.',
-        subs:[
-          {id:'s131',t:'Definir criterio: Alta = para la línea si falla · Media = afecta calidad o eficiencia · Baja = redundante o no crítico'},
-          {id:'s132',t:'Asignar Prioridad de Migración a cada equipo obsoleto: Urgente | Alta | Media | Baja'},
-          {id:'s133',t:'Verificar si hay repuesto en almacén SAP para cada equipo crítico — define el nivel de exposición real'},
-        ],
-        info:'✅ Estado actual ACL: 927 Urgente (Discontinued) · 418 Alta (Phaseout) · 916 obsoletos SIN stock de respaldo'},
-     ]},
-    {id:'p2',col:'#4a9eff',bg:'#ddeeff',tx:'#0c3d72',n:'2',title:'Fase 2 — Diagnóstico: clasificar el estado de cada equipo',timing:'Semanas 4–6',
-     steps:[
-       {id:'s21',title:'Crear cuenta en SIOS y mySupport',tags:[{t:'Gratis',c:'#eaf3de',tc:'#3b6d11'}],resp:'Edwin',
-        desc:'SIOS (Siemens Industry Online Support) es el portal para consultar el estado del ciclo de vida. mySupport crea alertas automáticas. Tiempo: 20 minutos.',
-        subs:[
-          {id:'s211',t:'Ir a support.industry.siemens.com → Register con email corporativo ACL'},
-          {id:'s212',t:'Activar mySupport → agregar todos los equipos Siemens del inventario a la lista de seguimiento'},
-          {id:'s213',t:'Configurar notificaciones por email para cambios de estado de ciclo de vida'},
-          {id:'s214',t:'Para otros fabricantes: Rockwell → rockwellautomation.com · Schneider → se.com/productlifecycle · ABB → new.abb.com'},
-        ],
-        info:'🌐 Portal gratuito: support.industry.siemens.com — Sin contrato requerido'},
-       {id:'s22',title:'Consultar estado de ciclo de vida de cada equipo en SIOS',tags:[],resp:'Ghersi + Edwin',
-        desc:'Buscar cada Código parte (MLFB) en SIOS para obtener el estado oficial del fabricante. Este paso define el riesgo real de cada equipo.',
-        subs:[
-          {id:'s221',t:'Buscar cada MLFB en SIOS → obtener estado: Active | Classic | Phaseout | Discontinued'},
-          {id:'s222',t:'Registrar: fecha fin de soporte + producto de reemplazo sugerido por el fabricante (campo Cambio Sugerido)'},
-          {id:'s223',t:'Guardar URL de la página SIOS en el campo "Respaldo" del Excel (para trazabilidad y auditorías)'},
-          {id:'s224',t:'Priorizar: primero los 927 Urgente, luego 418 Alta, luego Media y Baja'},
-          {id:'s225',t:'Actualizar campo Obsoleto? y Prioridad Migración en el Excel y recargar al sistema web'},
-        ],
-        warn:'⚠️ Acción inmediata: Los 927 Discontinued ya están identificados. Verificar Cambio Sugerido para críticos de Pucusana (360) y Trujillo (90)'},
-       {id:'s23',title:'Construir la matriz de riesgo de obsolescencia',tags:[],resp:'Edwin + Meliza',
-        desc:'Cruzar Criticidad × Estado ciclo de vida para generar el mapa de prioridades. El sistema web ya hace esto automáticamente.',
-        subs:[
-          {id:'s231',t:'🔴 Crítico urgente = Discontinued + Alta → 927 equipos → Acción esta semana'},
-          {id:'s232',t:'🟠 Alto riesgo = Phaseout + Alta/Media → 418 equipos → Plan en 12 meses'},
-          {id:'s233',t:'🟡 Riesgo medio = Classic o Phaseout + Baja → 325 equipos → Monitorear periódicamente'},
-          {id:'s234',t:'Presentar matriz a Fernando Soca con los números reales de ACL para gestión de presupuesto'},
-        ],
-        info:'✅ Ya disponible: La pestaña Matriz del sistema web muestra el cruce en tiempo real. Cada celda es clickeable y filtra el inventario.'},
-     ]},
-    {id:'p3',col:'#ef9f27',bg:'#faeeda',tx:'#854f0b',n:'3',title:'Fase 3 — Base de datos: centralizar la información',timing:'Semanas 7–10',
-     steps:[
-       {id:'s31',title:'Decidir dónde vivirá tu base de datos',tags:[{t:'Decisión clave',c:'#faeeda',tc:'#854f0b'}],resp:'Edwin + Fernando',
-        desc:'ACL ya tiene la decisión tomada: Excel + Sistema web en GitHub Pages. Esta combinación cubre las necesidades sin costo adicional.',
-        subs:[
-          {id:'s311',t:'Solución actual (implementada): Excel mensual + Sistema web ACL (GitHub Pages) como visualización y gestión'},
-          {id:'s312',t:'Solución futura (Fase 4): Integrar con SAP PM → clase de características "Obsolescencia" con campos Estado CV, Fin soporte, Reemplazo'},
-          {id:'s313',t:'Definir responsable de actualización mensual del Excel y carga al sistema web — Propuesta: Kevin Silva'},
-        ],
-        info:'✅ Decisión tomada: Sistema web ACL en GitHub Pages + Excel unificado mensual. Sin costo de infraestructura.'},
-       {id:'s32',title:'Estructurar la base de datos maestra',tags:[],resp:'Edwin + Kevin',
-        desc:'El Excel ACL ya tiene 33 columnas. Ahora hay que completar los campos que faltan y establecer la rutina de mantenimiento.',
-        subs:[
-          {id:'s321',t:'Completar campo Responsable para todos los equipos (actualmente solo 300 de 5,663 = 5%)'},
-          {id:'s322',t:'Completar campo Fecha de actualización para todos los registros (actualmente solo 15 tienen fecha)'},
-          {id:'s323',t:'Completar Monto estimado de reemplazo para los 927 Discontinued (necesario para gestión presupuestal)'},
-          {id:'s324',t:'Completar Comentario de obsolescencia para los equipos sin notas'},
-          {id:'s325',t:'Rutina mensual: actualizar Excel el primer lunes de cada mes → cargar nuevo index.html al sistema web'},
-        ],
-        warn:'⚠️ Campos críticos incompletos: Responsable solo 5% · Monto estimado solo 2 de 1,670 · Fecha actualización solo 15 registros'},
-       {id:'s33',title:'Conectar mySupport para actualizaciones automáticas',tags:[{t:'Gratis',c:'#eaf3de',tc:'#3b6d11'}],resp:'Edwin',
-        desc:'mySupport envía alertas por email cuando un producto cambia de estado. Garantiza que el sistema siempre esté actualizado.',
-        subs:[
-          {id:'s331',t:'Agregar todos los MLFB Siemens a la lista de seguimiento de mySupport (empezar por los 927 Urgente)'},
-          {id:'s332',t:'Cuando llegue alerta de mySupport → actualizar Estado CV en el Excel → recargar al sistema web'},
-          {id:'s333',t:'Futuro (Fase 4): Power Automate → email de mySupport actualiza automáticamente SharePoint/SAP PM'},
-        ],
-        info:'🌐 Portal: support.industry.siemens.com/My/ — Alertas automáticas gratuitas para equipos Siemens'},
-     ]},
-    {id:'p4',col:'#a855f7',bg:'#f3e8ff',tx:'#7e22ce',n:'4',title:'Fase 4 — Plan de acción: atacar los rojos y naranjas',timing:'Mes 3 en adelante',
-     steps:[
-       {id:'s41',title:'Generar plan de migración por prioridad',tags:[{t:'Urgente',c:'#fcebeb',tc:'#a32d2d'}],resp:'Edwin + Kevin',
-        desc:'Crear un plan detallado para cada equipo 🔴 y 🟠 con reemplazo definido, fecha, responsable y presupuesto. Sincronizar con paradas programadas.',
-        subs:[
-          {id:'s411',t:'Filtrar en el sistema web: 🔴 Críticos + sin stock → máxima urgencia (filtro "Sin stock" + riesgo "Crítico urgente")'},
-          {id:'s412',t:'Para cada equipo crítico: definir reemplazo exacto con referencia técnica del fabricante y conseguir cotización con Compras'},
-          {id:'s413',t:'Usar TIA Migration Tool para proyectos STEP 7 (S7-300/400) → evaluar esfuerzo de migración a TIA Portal S7-1500 antes de comprometer fecha'},
-          {id:'s414',t:'Asignar en el sistema web: Responsable ACL + Fecha migración planificada + Notas para cada equipo del plan'},
-        ],
-        warn:'🚨 Prioridad máxima: Pucusana tiene 360 críticos sin stock. Iniciar plan esta semana con Ghersi Chang.'},
-       {id:'s42',title:'Gestión de compras urgente — 916 equipos sin stock',tags:[{t:'Urgente',c:'#fcebeb',tc:'#a32d2d'}],resp:'Miguel MRO + Compras',
-        desc:'Los 916 equipos obsoletos sin stock son el mayor riesgo operacional. Si alguno falla antes de ser reemplazado, no hay repuesto disponible.',
-        subs:[
-          {id:'s421',t:'Exportar lista de 916 sin stock desde el sistema web (filtro "Obs. sin stock") → enviar a Compras con código SAP y costo estimado'},
-          {id:'s422',t:'Priorizar: Lote 1 → 360 sin stock Pucusana · Lote 2 → 90 Trujillo · Lote 3 → Zárate / Arequipa / Cuzco / Iquitos'},
-          {id:'s423',t:'Para equipos Discontinued: evaluar si comprar repuesto original (last-time-buy) o directamente el equipo de reemplazo nuevo'},
-          {id:'s424',t:'Actualizar Stock fisico Almacen y Disponibilidad final en el Excel al recibir cada compra → recargar al sistema web'},
-        ],
-        info:''},
-       {id:'s43',title:'Ejecutar migraciones en paradas programadas',tags:[],resp:'Ghersi + Edwin + Técnicos planta',
-        desc:'Las migraciones deben coordinarse con producción. Kevin coordina fechas con mínimo 4 semanas de anticipación.',
-        subs:[
-          {id:'s431',t:'Pucusana (sep 2026): PLCs S7-300/400 → S7-1500 · HMIs → WinCC Unified · Coordinar con parada general de planta'},
-          {id:'s432',t:'Trujillo (sep-oct 2026): 90 equipos críticos · Coordinar con Jefe de Mantenimiento Trujillo'},
-          {id:'s433',t:'Zárate, Arequipa, Cuzco, Iquitos (oct-nov 2026): Menor volumen — planificar en paradas menores de cada planta'},
-          {id:'s434',t:'Tras cada migración: actualizar Obsoleto = No y Estado CV = Active en el Excel + recargar al sistema web'},
-        ],
-        info:'🔧 Herramienta: TIA Portal + TIA Migration Tool + Siemens Upgrade Service para casos complejos'},
-       {id:'s44',title:'Crear dashboard de seguimiento para Fernando Soca',tags:[],resp:'Edwin',
-        desc:'Revisión mensual con evidencia visual del avance: equipos migrados, reducción de riesgo, gasto ejecutado vs. presupuesto.',
-        subs:[
-          {id:'s441',t:'Revisión mensual con Fernando: presentar dashboard del sistema web (pestaña Dashboard + filtros por planta)'},
-          {id:'s442',t:'KPIs a reportar: N° migraciones ejecutadas · Reducción de Discontinued · N° sin stock resueltos · Presupuesto ejecutado'},
-          {id:'s443',t:'Meta diciembre 2026: Discontinued reducido de 927 a menos de 200 · Sin stock reducido de 916 a menos de 300'},
-        ],
-        info:''},
-       {id:'s45',title:'Establecer rutina permanente de mantenimiento del sistema',tags:[],resp:'Kevin + Edwin',
-        desc:'El sistema solo funciona si se mantiene actualizado. La rutina garantiza visibilidad de obsolescencia permanente en ACL.',
-        subs:[
-          {id:'s451',t:'Mensual (Kevin): Revisar alertas mySupport + actualizar Excel + cargar nuevo index.html al sistema web'},
-          {id:'s452',t:'Al instalar equipo nuevo: agregar al Excel ese mismo día — Jefe de planta notifica a Edwin / Kevin'},
-          {id:'s453',t:'Trimestral (Edwin): Revisar avance del plan de migración con cada jefe de planta'},
-          {id:'s454',t:'Anual (Edwin + Fernando): Auditoría completa del inventario + definir plan y presupuesto del siguiente año'},
-          {id:'s455',t:'Futuro: Integrar con Senseye → cruzar predicción de fallo con riesgo de obsolescencia para mantenimiento proactivo total'},
-        ],
-        info:''},
-     ]},
+  {id:'f1',n:'1',col:'#4ade80',tcol:'#000',bg:'#eaf3de',tx:'#3b6d11',
+   title:'Fase 1 — Inventario: saber qué tienes',time:'Semanas 1–3',
+   steps:[
+    {id:'s11',title:'Listar todas las plantas y líneas de producción',
+     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#eaf3de;color:#3b6d11">Inicio</span>',
+     resp:'Edwin + Jefes planta',
+     desc:'Crear el mapa completo de ACL: 6 plantas, líneas por planta y áreas (Control, Eléctrica, Instrumentación). Es la columna vertebral de todo el inventario.',
+     subs:[
+      {id:'s111',t:'Confirmar 6 plantas con códigos SAP: Pucusana (1040) · Trujillo (5040) · Zárate (2000) · Arequipa (7000) · Cuzco (7010) · Iquitos (6300)'},
+      {id:'s112',t:'Levantar número de líneas de producción por planta con cada jefe de mantenimiento'},
+      {id:'s113',t:'Definir áreas: Tableros eléctricos · Paneles de control · Sala de instrumentación · SCADA'},
+      {id:'s114',t:'Crear Excel base: Planta | Centro | Línea | Área | Denominación U.T.'},
+     ],
+     info:'✅ ACL ya tiene esto: 5,663 equipos · Pucusana 3,926 · Trujillo 984 · Zárate 304 · Arequipa 236 · Cuzco 119 · Iquitos 94'},
+    {id:'s12',title:'Levantar inventario de equipos electrónicos por planta',
+     tags:'',resp:'Edwin + Ghersi + Técnicos',
+     desc:'Recorrer físicamente cada tablero y panel. Fotografiar la placa de cada equipo. Registrar todos los datos técnicos necesarios para consultar en SIOS.',
+     subs:[
+      {id:'s121',t:'Registrar: Tipo componente | Marca | Modelo | Código parte MLFB | N° SAP Montaje | N° SAP Componente'},
+      {id:'s122',t:'Capturar: Familia | Código Obsolescencia | Cantidad | N° de serie | Año fabricación/instalación'},
+      {id:'s123',t:'Registrar SAP MORTIZ y descripción MORTIZ para equipos con mantenimiento mayor'},
+      {id:'s124',t:'Verificar stock físico en almacén por planta y cruzar con SAP'},
+      {id:'s125',t:'Consolidar en Excel unificado (33 campos del formato ACL) y cargar al sistema web'},
+     ],
+     warn:'⚠️ Verificar cobertura al 100% de líneas en cada planta. Ghersi Chang ya tiene 300 equipos con responsable asignado.'},
+    {id:'s13',title:'Priorizar equipos críticos (no todo es igual)',
+     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#faeeda;color:#854f0b">Decisión clave</span>',
+     resp:'Meliza + Edwin',
+     desc:'Asignar criticidad según impacto en producción. Los de Criticidad Alta son la primera prioridad absoluta para intervención.',
+     subs:[
+      {id:'s131',t:'Alta = para la línea si falla · Media = afecta calidad/eficiencia · Baja = redundante o no crítico'},
+      {id:'s132',t:'Asignar Prioridad de Migración a cada equipo obsoleto: Urgente | Alta | Media | Baja'},
+      {id:'s133',t:'Verificar si hay repuesto en almacén SAP para cada equipo crítico — define el nivel de exposición real'},
+     ],
+     info:'✅ Estado actual ACL: 927 Urgente (Discontinued) · 418 Alta (Phaseout) · 916 obsoletos SIN stock de respaldo'},
+   ]},
+  {id:'f2',n:'2',col:'#4a9eff',tcol:'#fff',bg:'#ddeeff',tx:'#0c3d72',
+   title:'Fase 2 — Diagnóstico: clasificar el estado de cada equipo',time:'Semanas 4–6',
+   steps:[
+    {id:'s21',title:'Crear cuenta en SIOS y mySupport',
+     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#eaf3de;color:#3b6d11">Gratis</span>',
+     resp:'Edwin',
+     desc:'SIOS (Siemens Industry Online Support) permite consultar el estado del ciclo de vida de cada equipo. mySupport crea alertas automáticas. Tiempo estimado: 20 minutos.',
+     subs:[
+      {id:'s211',t:'Ir a support.industry.siemens.com → Register con email corporativo ACL'},
+      {id:'s212',t:'Activar mySupport → agregar todos los equipos Siemens del inventario a la lista de seguimiento'},
+      {id:'s213',t:'Configurar notificaciones por email para cambios de estado de ciclo de vida'},
+      {id:'s214',t:'Para otros fabricantes: Rockwell → rockwellautomation.com · Schneider → se.com/productlifecycle · ABB → new.abb.com'},
+     ],
+     info:'🌐 Portal gratuito: support.industry.siemens.com — Sin contrato requerido'},
+    {id:'s22',title:'Consultar estado de ciclo de vida de cada equipo en SIOS',
+     tags:'',resp:'Ghersi + Edwin',
+     desc:'Buscar cada Código parte (MLFB) del inventario en SIOS para obtener el estado oficial del fabricante. Este paso define el nivel de riesgo real de cada equipo.',
+     subs:[
+      {id:'s221',t:'Buscar cada MLFB en SIOS → obtener estado: Active | Classic | Phaseout | Discontinued'},
+      {id:'s222',t:'Registrar: fecha fin de soporte + producto de reemplazo sugerido (campo Cambio Sugerido en Excel)'},
+      {id:'s223',t:'Guardar URL de la página SIOS en el campo Respaldo del Excel (para trazabilidad y auditorías)'},
+      {id:'s224',t:'Priorizar consulta: primero los 927 Urgente, luego 418 Alta, luego Media y Baja'},
+      {id:'s225',t:'Actualizar campo Obsoleto? y Prioridad Migración en el Excel y recargar al sistema web'},
+     ],
+     warn:'⚠️ Acción inmediata: 927 Discontinued ya identificados. Verificar Cambio Sugerido para críticos de Pucusana (360) y Trujillo (90)'},
+    {id:'s23',title:'Construir la matriz de riesgo de obsolescencia',
+     tags:'',resp:'Edwin + Meliza',
+     desc:'Cruzar Criticidad × Estado ciclo de vida para generar el mapa de prioridades. El sistema web ya hace esto automáticamente.',
+     subs:[
+      {id:'s231',t:'🔴 Crítico urgente = Discontinued + Alta → 927 equipos → Acción esta semana'},
+      {id:'s232',t:'🟠 Alto riesgo = Phaseout + Alta/Media → 418 equipos → Plan en 12 meses'},
+      {id:'s233',t:'🟡 Riesgo medio = Classic o Phaseout + Baja → 325 equipos → Monitorear'},
+      {id:'s234',t:'Presentar matriz a Fernando Soca con los números reales de ACL para gestión de presupuesto'},
+     ],
+     info:'✅ Ya disponible: la pestaña Matriz muestra el cruce en tiempo real. Cada celda filtra el inventario automáticamente.'},
+   ]},
+  {id:'f3',n:'3',col:'#ef9f27',tcol:'#fff',bg:'#faeeda',tx:'#854f0b',
+   title:'Fase 3 — Base de datos: centralizar la información',time:'Semanas 7–10',
+   steps:[
+    {id:'s31',title:'Decidir dónde vivirá tu base de datos',
+     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#faeeda;color:#854f0b">Decisión clave</span>',
+     resp:'Edwin + Fernando',
+     desc:'ACL ya tiene la decisión tomada: Excel + Sistema web en GitHub Pages. Esta combinación cubre las necesidades sin costo adicional.',
+     subs:[
+      {id:'s311',t:'Solución actual implementada: Excel mensual + Sistema web ACL (GitHub Pages) como visualización y gestión'},
+      {id:'s312',t:'Solución futura: Integrar con SAP PM → clase de características Obsolescencia con campos Estado CV, Fin soporte, Reemplazo'},
+      {id:'s313',t:'Definir responsable de actualización mensual del Excel y carga al sistema web — Propuesta: Kevin Silva'},
+     ],
+     info:'✅ Decisión tomada: Sistema web ACL en GitHub Pages + Excel unificado mensual. Sin costo de infraestructura.'},
+    {id:'s32',title:'Estructurar la base de datos maestra',
+     tags:'',resp:'Edwin + Kevin',
+     desc:'El Excel ACL ya tiene 33 columnas estructuradas. Ahora hay que completar los campos que faltan y establecer la rutina de mantenimiento.',
+     subs:[
+      {id:'s321',t:'Completar campo Responsable para todos los equipos (actualmente solo 300 de 5,663 tienen responsable = 5%)'},
+      {id:'s322',t:'Completar campo Fecha de actualización para todos los registros (actualmente solo 15 tienen fecha)'},
+      {id:'s323',t:'Completar Monto estimado de reemplazo para los 927 Discontinued (necesario para gestión presupuestal con Fernando)'},
+      {id:'s324',t:'Completar Comentario de obsolescencia para equipos sin notas'},
+      {id:'s325',t:'Rutina mensual: actualizar Excel el primer lunes de cada mes → cargar nuevo index.html al sistema web'},
+     ],
+     warn:'⚠️ Campos críticos incompletos hoy: Responsable solo 5% · Monto estimado solo 2 de 1,670 · Fecha actualización solo 15 registros'},
+    {id:'s33',title:'Conectar mySupport para actualizaciones automáticas',
+     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#eaf3de;color:#3b6d11">Gratis</span>',
+     resp:'Edwin',
+     desc:'mySupport envía alertas por email cuando un producto cambia de estado. Garantiza que el sistema siempre esté actualizado sin revisiones manuales.',
+     subs:[
+      {id:'s331',t:'Agregar todos los MLFB Siemens a la lista de seguimiento de mySupport (empezar por los 927 Urgente)'},
+      {id:'s332',t:'Cuando llegue alerta de mySupport → actualizar Estado CV en el Excel → recargar al sistema web'},
+      {id:'s333',t:'Futuro (Fase 4): Power Automate → email de mySupport actualiza automáticamente SharePoint o SAP PM'},
+     ],
+     info:'🌐 Portal: support.industry.siemens.com/My/ — Alertas automáticas gratuitas para equipos Siemens'},
+   ]},
+  {id:'f4',n:'4',col:'#a855f7',tcol:'#fff',bg:'#f3e8ff',tx:'#7e22ce',
+   title:'Fase 4 — Plan de acción: atacar los rojos y naranjas',time:'Mes 3 en adelante',
+   steps:[
+    {id:'s41',title:'Generar plan de migración por prioridad',
+     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#fcebeb;color:#a32d2d">Urgente</span>',
+     resp:'Edwin + Kevin',
+     desc:'Crear un plan detallado para cada equipo 🔴 y 🟠, con reemplazo definido, fecha, responsable técnico y presupuesto. Sincronizar con paradas programadas de cada planta.',
+     subs:[
+      {id:'s411',t:'Filtrar en el sistema web: 🔴 Críticos + sin stock → esta es la lista de máxima urgencia (filtro Sin stock + riesgo Crítico urgente)'},
+      {id:'s412',t:'Para cada equipo crítico: definir reemplazo exacto con referencia técnica del fabricante y conseguir cotización con Compras'},
+      {id:'s413',t:'Usar TIA Migration Tool para proyectos STEP 7 (S7-300/400) → evaluar esfuerzo de migración a S7-1500 antes de comprometer fecha'},
+      {id:'s414',t:'Asignar en el sistema web: Responsable ACL + Fecha migración planificada + Notas para cada equipo del plan'},
+     ],
+     warn:'🚨 Prioridad máxima: Pucusana tiene 360 críticos sin stock. Iniciar plan esta semana con Ghersi Chang.'},
+    {id:'s42',title:'Gestión de compras urgente — 916 equipos sin stock',
+     tags:'<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#fcebeb;color:#a32d2d">Urgente</span>',
+     resp:'Miguel MRO + Compras',
+     desc:'Los 916 equipos obsoletos sin stock son el mayor riesgo operacional. Si alguno falla antes de ser reemplazado, no hay repuesto disponible en almacén.',
+     subs:[
+      {id:'s421',t:'Exportar lista de 916 sin stock desde el sistema web (filtro Obs. sin stock) → enviar a Compras con código SAP y costo estimado'},
+      {id:'s422',t:'Priorizar: Lote 1 → 360 sin stock Pucusana · Lote 2 → 90 Trujillo · Lote 3 → Zárate, Arequipa, Cuzco, Iquitos'},
+      {id:'s423',t:'Para Discontinued: evaluar si comprar repuesto original last-time-buy o directamente el equipo de reemplazo nuevo'},
+      {id:'s424',t:'Actualizar Stock fisico Almacen y Disponibilidad final en el Excel al recibir cada compra → recargar al sistema web'},
+     ],
+     info:''},
+    {id:'s43',title:'Ejecutar migraciones en paradas programadas',
+     tags:'',resp:'Ghersi + Edwin + Técnicos planta',
+     desc:'Las migraciones deben coordinarse con producción. Kevin coordina las fechas con mínimo 4 semanas de anticipación.',
+     subs:[
+      {id:'s431',t:'Pucusana (sep 2026): PLCs S7-300/400 → S7-1500 · HMIs → WinCC Unified · Coordinar con parada general de planta'},
+      {id:'s432',t:'Trujillo (sep-oct 2026): 90 equipos críticos · Coordinar con Jefe de Mantenimiento Trujillo'},
+      {id:'s433',t:'Zárate, Arequipa, Cuzco, Iquitos (oct-nov 2026): Menor volumen — planificar en paradas menores de cada planta'},
+      {id:'s434',t:'Tras cada migración: actualizar Obsoleto = No y Estado CV = Active en el Excel + recargar al sistema web'},
+     ],
+     info:'🔧 Herramienta: TIA Portal + TIA Migration Tool + Siemens Upgrade Service para casos complejos'},
+    {id:'s44',title:'Crear dashboard de seguimiento para Fernando Soca',
+     tags:'',resp:'Edwin',
+     desc:'Revisión mensual con evidencia visual del avance: equipos migrados, reducción de riesgo, gasto ejecutado vs. presupuesto aprobado.',
+     subs:[
+      {id:'s441',t:'Revisión mensual con Fernando: presentar pestaña Dashboard del sistema web con KPIs y filtros por planta'},
+      {id:'s442',t:'KPIs a reportar: N° migraciones ejecutadas · Reducción de Discontinued · Sin stock resueltos · Presupuesto ejecutado'},
+      {id:'s443',t:'Meta diciembre 2026: Discontinued reducido de 927 a menos de 200 · Sin stock reducido de 916 a menos de 300'},
+     ],
+     info:''},
+    {id:'s45',title:'Establecer rutina permanente de mantenimiento del sistema',
+     tags:'',resp:'Kevin + Edwin',
+     desc:'El sistema solo funciona si se mantiene actualizado. La rutina garantiza visibilidad de obsolescencia de forma permanente en ACL.',
+     subs:[
+      {id:'s451',t:'Mensual (Kevin): Revisar alertas mySupport + actualizar Excel + cargar nuevo index.html al sistema web'},
+      {id:'s452',t:'Al instalar equipo nuevo: agregar al Excel ese mismo día — Jefe de planta notifica a Edwin o Kevin'},
+      {id:'s453',t:'Trimestral (Edwin): Revisar avance del plan de migración con cada jefe de planta'},
+      {id:'s454',t:'Anual (Edwin + Fernando): Auditoría completa del inventario + definir plan y presupuesto del siguiente año'},
+      {id:'s455',t:'Futuro: Integrar con Senseye → cruzar predicción de fallo con riesgo de obsolescencia para mantenimiento proactivo total'},
+     ],
+     info:''},
+   ]},
   ];
 
-  /* ── build DOM ── */
-  function el(tag,css,html){
-    const e=document.createElement(tag);
-    if(css) e.style.cssText=css;
-    if(html) e.innerHTML=html;
-    return e;
-  }
-
-  // Header
-  const hdr=el('div','background:linear-gradient(135deg,#0b1d3a,#163364);color:#fff;border-radius:12px;padding:28px 32px;margin-bottom:18px',
-    `<div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#4a9eff;margin-bottom:8px">JEFATURA NACIONAL DE MANTENIMIENTO — ACL</div>
-     <div style="font-size:22px;font-weight:700;margin-bottom:6px">Plan de Trabajo — Gestión de Obsolescencia Electrónica</div>
-     <div style="font-size:13px;color:rgba(255,255,255,.65)">Arca Continental Lindley · 6 plantas · Perú · Julio – Diciembre 2026</div>
-     <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;font-size:11px">
-       <span style="color:rgba(255,255,255,.5)">Responsable: <strong style="color:#fff">Edwin Ampuero</strong></span>
-       <span style="color:rgba(255,255,255,.5)">Aprueba: <strong style="color:#fff">Fernando Soca</strong></span>
-       <span style="color:rgba(255,255,255,.5)">Actualizado: <strong style="color:#fff">21 julio 2026</strong></span>
-     </div>`);
-  app.appendChild(hdr);
-
-  // Print btn
-  app.appendChild(el('div','display:flex;justify-content:flex-end;margin-bottom:14px',
-    `<button onclick="window.print()" style="background:var(--ac);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:500">🖨️ Imprimir / Guardar PDF</button>`));
-
-  // KPIs
-  const kr=el('div','display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:16px');
-  [['5,663','Total equipos','var(--tx)'],['1,670','Obsoletos','#854f0b'],['927','Discontinued','#a32d2d'],['418','Phaseout','#854f0b'],['916','Sin stock','#a32d2d'],['754','Con stock','#3b6d11']].forEach(([v,l,c])=>{
-    kr.appendChild(el('div','background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:10px;text-align:center',
-      `<div style="font-size:22px;font-weight:700;color:${c};line-height:1;margin-bottom:3px">${v}</div><div style="font-size:10px;color:var(--tx2)">${l}</div>`));
-  });
-  app.appendChild(kr);
-
-  // Global progress header
-  const pgw=el('div','background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:18px');
-  pgw.appendChild(el('div','font-size:12px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between',
-    `<span>Progreso general del plan</span><span id="wp-gpct" style="color:var(--ac);font-weight:700">0%</span>`));
-  const pmr=el('div','display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px');
+  /* ── BUILD HTML ── */
+  let phaseHTML='';
   PHASES.forEach(ph=>{
-    const pm=el('div',`border-radius:8px;padding:10px;text-align:center;cursor:pointer;background:${ph.bg};border:0.5px solid ${ph.tx}`,
-      `<div id="wppm-${ph.id}" style="font-size:18px;font-weight:700;color:${ph.tx};line-height:1;margin-bottom:2px">0%</div>
-       <div style="font-size:10px;font-weight:600;color:${ph.tx}">${ph.n.replace(/\d/,m=>'Fase '+m)}</div>`);
-    pm.onclick=()=>{const b=document.getElementById('wpb-'+ph.id);if(b){b.style.display=b.style.display==='none'?'block':'none';}};
-    pmr.appendChild(pm);
-  });
-  pgw.appendChild(pmr);
-  pgw.appendChild(el('div','height:8px;background:var(--bd);border-radius:4px;overflow:hidden',
-    `<div id="wp-gbar" style="height:100%;width:0%;border-radius:4px;background:linear-gradient(90deg,#4ade80,#4a9eff);transition:width .5s"></div>`));
-  app.appendChild(pgw);
-
-  // hint
-  app.appendChild(el('p','font-size:11px;color:var(--tx3);margin-bottom:14px',
-    '💡 Haz clic en cada paso para marcarlo como completado. El progreso se guarda automáticamente en este navegador.'));
-
-  function calcProg(){
-    let tot=0,dn=0;
-    PHASES.forEach(ph=>{
-      const d=ph.steps.filter(st=>S[st.id]).length;
-      const t=ph.steps.length;
-      const pct=t?Math.round(d/t*100):0;
-      const pm=document.getElementById('wppm-'+ph.id);
-      if(pm) pm.textContent=pct+'%';
-      const pf=document.getElementById('wpfp-'+ph.id);
-      if(pf) pf.style.width=pct+'%';
-      const pp=document.getElementById('wpfpp-'+ph.id);
-      if(pp) pp.textContent=pct+'%';
-      const bd=document.getElementById('wpbd-'+ph.id);
-      if(bd) bd.textContent=d+' / '+t;
-      tot+=t; dn+=d;
-    });
-    const g=tot?Math.round(dn/tot*100):0;
-    const gp=document.getElementById('wp-gpct');if(gp)gp.textContent=g+'%';
-    const gb=document.getElementById('wp-gbar');if(gb)gb.style.width=g+'%';
-  }
-
-  // Build phases
-  PHASES.forEach(ph=>{
-    const phDiv=el('div','border:0.5px solid var(--bd);border-radius:10px;margin-bottom:12px;overflow:hidden;background:var(--s1)');
-
-    // Phase header
-    const phHdr=el('div','padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .15s');
-    phHdr.onmouseenter=()=>phHdr.style.background='var(--s2)';
-    phHdr.onmouseleave=()=>phHdr.style.background='transparent';
-    phHdr.onclick=()=>{
-      const b=document.getElementById('wpb-'+ph.id);
-      const c=document.getElementById('wpc-'+ph.id);
-      if(b&&c){const open=b.style.display!=='none';b.style.display=open?'none':'block';c.textContent=open?'▾':'▴';}
-    };
-    phHdr.innerHTML=`
-      <div style="width:32px;height:32px;border-radius:50%;background:${ph.col};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:${ph.col==='#4ade80'?'#000':'#fff'};flex-shrink:0">${ph.n}</div>
-      <div style="flex:1">
-        <div style="font-size:14px;font-weight:600;color:var(--tx)">${ph.title}</div>
-        <div style="font-size:11px;color:var(--tx2);margin-top:2px">
-          <span style="background:var(--s2);padding:1px 7px;border-radius:8px;font-size:10px;border:0.5px solid var(--bd)">⏱ ${ph.timing}</span>
-          &nbsp;${ph.steps.length} pasos
-        </div>
-      </div>
-      <span id="wpbd-${ph.id}" style="font-size:11px;padding:2px 9px;border-radius:8px;font-weight:600;background:${ph.bg};color:${ph.tx}">0 / ${ph.steps.length}</span>
-      <span id="wppct-${ph.id}" style="font-size:12px;font-weight:700;min-width:34px;text-align:right;color:${ph.col}">0%</span>
-      <span id="wpc-${ph.id}" style="color:var(--tx3);font-size:18px">▴</span>`;
-    phDiv.appendChild(phHdr);
-
-    // Phase body
-    const phBody=el('div','border-top:0.5px solid var(--bd)');
-    phBody.id='wpb-'+ph.id;
-
-    // Phase progress bar
-    phBody.appendChild(el('div','padding:9px 16px;background:var(--s2);border-bottom:0.5px solid var(--bd);display:flex;align-items:center;gap:10px',
-      `<span style="font-size:10px;color:var(--tx2)">Progreso</span>
-       <div style="flex:1;height:5px;background:var(--bd);border-radius:3px;overflow:hidden">
-         <div id="wpfp-${ph.id}" style="height:100%;width:0%;border-radius:3px;background:${ph.col};transition:width .4s"></div>
-       </div>
-       <span id="wpfpp-${ph.id}" style="font-size:10px;font-weight:600;color:${ph.col}">0%</span>`));
-
-    // Steps
+    let stepsHTML='';
     ph.steps.forEach(st=>{
-      const stDiv=el('div','padding:14px 16px;border-bottom:0.5px solid #f0efe9;transition:background .15s');
-      stDiv.id='wpst-'+st.id;
-      if(S[st.id]) stDiv.classList.add('wpdone');
-
-      const stTop=el('div','display:flex;gap:10px;align-items:flex-start');
-
-      // Checkbox
-      const chk=el('div',`width:20px;height:20px;border-radius:5px;border:1.5px solid var(--bd2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:2px;transition:all .2s;font-size:11px;font-weight:700;color:transparent;${S[st.id]?'background:#4ade80;border-color:#4ade80;color:#fff':''}`);
-      chk.textContent='✓';
-      chk.id='wpchk-'+st.id;
-      chk.onclick=()=>{
-        S[st.id]=!S[st.id];
-        save();
-        chk.style.background=S[st.id]?'#4ade80':'transparent';
-        chk.style.borderColor=S[st.id]?'#4ade80':'var(--bd2)';
-        chk.style.color=S[st.id]?'#fff':'transparent';
-        const tspan=document.getElementById('wptitle-'+st.id);
-        if(tspan) tspan.style.textDecoration=S[st.id]?'line-through':'none';
-        if(tspan) tspan.style.color=S[st.id]?'var(--tx2)':'var(--tx)';
-        calcProg();
-      };
-
-      const main=el('div','flex:1');
-
-      // Title row
-      const trow=el('div','display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px');
-      const tspan=el('span','font-size:13px;font-weight:500;'+(S[st.id]?'text-decoration:line-through;color:var(--tx2)':'color:var(--tx)'));
-      tspan.id='wptitle-'+st.id;
-      tspan.textContent=st.title;
-      trow.appendChild(tspan);
-      (st.tags||[]).forEach(tag=>{
-        trow.appendChild(el('span',`display:inline-block;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:${tag.c};color:${tag.tc}`,tag.t));
+      const chkStyle=S[st.id]?'background:#4ade80;border-color:#4ade80;color:#fff':'background:transparent;border-color:var(--bd2);color:transparent';
+      const lblStyle=S[st.id]?'text-decoration:line-through;color:var(--tx2)':'color:var(--tx)';
+      let subsHTML='';
+      (st.subs||[]).forEach(ss=>{
+        const sChk=S[ss.id]?'background:#4ade80;border-color:#4ade80;color:#fff':'background:transparent;border-color:var(--bd2);color:transparent';
+        const sTxt=S[ss.id]?'text-decoration:line-through;color:var(--tx3)':'';
+        subsHTML+=`
+          <div onclick="toggleSub('${ss.id}')" style="display:flex;gap:7px;align-items:flex-start;padding:5px 6px;border-radius:5px;cursor:pointer;font-size:12px;color:var(--tx2)" onmouseenter="this.style.background='var(--s2)'" onmouseleave="this.style.background='transparent'">
+            <div id="ck${ss.id}" style="width:14px;height:14px;border-radius:3px;border:1.5px solid;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;transition:all .2s;${sChk}">✓</div>
+            <span id="lb${ss.id}" style="${sTxt}">${ss.t}</span>
+          </div>`;
       });
-      if(st.resp){
-        trow.appendChild(el('span','display:inline-flex;background:#ddeeff;color:#0c3d72;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:500',st.resp));
-      }
-      main.appendChild(trow);
-
-      // Description
-      if(st.desc){
-        main.appendChild(el('p','font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:7px',st.desc));
-      }
-
-      // Sub-tasks
-      if(st.subs&&st.subs.length){
-        const sl=el('div','display:flex;flex-direction:column;gap:5px;margin-top:6px;padding-left:2px');
-        st.subs.forEach(ss=>{
-          const ssDiv=el('div',`display:flex;gap:7px;align-items:flex-start;font-size:12px;color:var(--tx2);cursor:pointer;padding:4px 6px;border-radius:5px;transition:background .15s;${S[ss.id]?'opacity:.65':''}`);
-          ssDiv.id='wpss-'+ss.id;
-          ssDiv.onmouseenter=()=>ssDiv.style.background='var(--s2)';
-          ssDiv.onmouseleave=()=>ssDiv.style.background='transparent';
-          const sc=el('div',`width:14px;height:14px;border-radius:3px;border:1.5px solid var(--bd2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:8px;font-weight:700;transition:all .2s;${S[ss.id]?'background:#4ade80;border-color:#4ade80;color:#fff':'color:transparent'}`,'✓');
-          sc.id='wpsc-'+ss.id;
-          const st2=el('span',S[ss.id]?'text-decoration:line-through;color:var(--tx3)':'');
-          st2.id='wpstxt-'+ss.id;
-          st2.innerHTML=ss.t;
-          ssDiv.onclick=()=>{
-            S[ss.id]=!S[ss.id]; save();
-            sc.style.background=S[ss.id]?'#4ade80':'transparent';
-            sc.style.borderColor=S[ss.id]?'#4ade80':'var(--bd2)';
-            sc.style.color=S[ss.id]?'#fff':'transparent';
-            st2.style.textDecoration=S[ss.id]?'line-through':'none';
-            st2.style.color=S[ss.id]?'var(--tx3)':'';
-            ssDiv.style.opacity=S[ss.id]?'.65':'1';
-          };
-          ssDiv.appendChild(sc); ssDiv.appendChild(st2);
-          sl.appendChild(ssDiv);
-        });
-        main.appendChild(sl);
-      }
-
-      // Info / Warning boxes
-      if(st.info){
-        main.appendChild(el('div','background:#ddeeff;border:0.5px solid #4a9eff;border-radius:7px;padding:9px 12px;margin-top:8px;font-size:12px;color:#0c3d72',st.info));
-      }
-      if(st.warn){
-        main.appendChild(el('div','background:#fcebeb;border:0.5px solid #e24b4a;border-radius:7px;padding:9px 12px;margin-top:8px;font-size:12px;color:#a32d2d',st.warn));
-      }
-
-      stTop.appendChild(chk); stTop.appendChild(main); stDiv.appendChild(stTop);
-      phBody.appendChild(stDiv);
+      const infoBox=st.info?`<div style="background:#ddeeff;border:0.5px solid #4a9eff;border-radius:7px;padding:9px 12px;margin-top:8px;font-size:12px;color:#0c3d72">${st.info}</div>`:'';
+      const warnBox=st.warn?`<div style="background:#fcebeb;border:0.5px solid #e24b4a;border-radius:7px;padding:9px 12px;margin-top:8px;font-size:12px;color:#a32d2d">${st.warn}</div>`:'';
+      stepsHTML+=`
+        <div id="wpst-${st.id}" style="padding:14px 16px;border-bottom:0.5px solid #f0efe9">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div id="ck${st.id}" onclick="toggleTask('${st.id}')" style="width:20px;height:20px;border-radius:5px;border:1.5px solid;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:2px;font-size:11px;font-weight:700;transition:all .2s;${chkStyle}">✓</div>
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px">
+                <span id="lb${st.id}" style="font-size:13px;font-weight:500;${lblStyle}">${st.title}</span>
+                ${st.tags}
+                ${st.resp?`<span style="background:#ddeeff;color:#0c3d72;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:500">${st.resp}</span>`:''}
+              </div>
+              <p style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:${subsHTML?'7px':'0'}">${st.desc}</p>
+              ${subsHTML?`<div style="display:flex;flex-direction:column;gap:3px;margin-top:6px">${subsHTML}</div>`:''}
+              ${infoBox}${warnBox}
+            </div>
+          </div>
+        </div>`;
     });
 
-    phDiv.appendChild(phBody);
-    app.appendChild(phDiv);
+    phaseHTML+=`
+      <div style="border:0.5px solid var(--bd);border-radius:10px;margin-bottom:12px;overflow:hidden;background:var(--s1)">
+        <div onclick="(function(){const b=document.getElementById('wpb-${ph.id}');const c=document.getElementById('wpc-${ph.id}');if(b&&c){const op=b.style.display!=='none';b.style.display=op?'none':'block';c.textContent=op?'▾':'▴';}})()" style="padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer" onmouseenter="this.style.background='var(--s2)'" onmouseleave="this.style.background='transparent'">
+          <div style="width:32px;height:32px;border-radius:50%;background:${ph.col};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:${ph.tcol};flex-shrink:0">${ph.n}</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600;color:var(--tx)">${ph.title}</div>
+            <div style="font-size:11px;color:var(--tx2);margin-top:2px">
+              <span style="background:var(--s2);padding:1px 7px;border-radius:8px;font-size:10px;border:0.5px solid var(--bd)">⏱ ${ph.time}</span>
+              &nbsp; ${ph.steps.length} pasos
+            </div>
+          </div>
+          <span id="wpbd-${ph.id}" style="font-size:11px;padding:2px 9px;border-radius:8px;font-weight:600;background:${ph.bg};color:${ph.tx};flex-shrink:0">0/${ph.steps.length}</span>
+          <span id="wppct-${ph.id}" style="font-size:12px;font-weight:700;min-width:34px;text-align:right;color:${ph.col}">0%</span>
+          <span id="wpc-${ph.id}" style="color:var(--tx3);font-size:18px;flex-shrink:0">▴</span>
+        </div>
+        <div id="wpb-${ph.id}" style="border-top:0.5px solid var(--bd)">
+          <div style="padding:9px 16px;background:var(--s2);border-bottom:0.5px solid var(--bd);display:flex;align-items:center;gap:10px">
+            <span style="font-size:10px;color:var(--tx2)">Progreso fase</span>
+            <div style="flex:1;height:5px;background:var(--bd);border-radius:3px;overflow:hidden">
+              <div id="wpfp-${ph.id}" style="height:100%;width:0%;border-radius:3px;background:${ph.col};transition:width .4s"></div>
+            </div>
+            <span id="wpfpp-${ph.id}" style="font-size:10px;font-weight:600;color:${ph.col}">0%</span>
+          </div>
+          ${stepsHTML}
+        </div>
+      </div>`;
   });
 
-  // Gantt
-  const gc=el('div','background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:14px 16px;margin-top:8px');
-  gc.appendChild(el('p','font-size:13px;font-weight:600;margin-bottom:10px','📅 Cronograma — Julio a Diciembre 2026'));
-  gc.appendChild(el('div','overflow-x:auto',`
-    <table style="width:100%;border-collapse:collapse;font-size:11px">
-      <thead><tr>
-        <th style="padding:5px 8px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:left;min-width:220px">Actividad</th>
-        ${['Jul','Ago','Sep','Oct','Nov','Dic'].map(m=>`<th style="padding:5px 8px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:center;min-width:68px">${m} 2026</th>`).join('')}
-      </tr></thead>
-      <tbody>
-        ${[
-          ['Fase 1 · Inventario',           '#4ade80','✓ DONE',[1,0,0,0,0,0]],
-          ['Fase 2 · Diagnóstico SIOS',      '#4a9eff','▌',    [1,1,0,0,0,0]],
-          ['Fase 3 · Base de datos',         '#ef9f27','▌',    [0,1,1,0,0,0]],
-          ['Fase 4 · Compras urgentes',      '#a855f7','▌',    [0,1,1,0,0,0]],
-          ['Fase 4 · Migraciones Pucusana',  '#e24b4a','⚒',   [0,0,1,0,0,0]],
-          ['Fase 4 · Migraciones Trujillo',  '#e24b4a','⚒',   [0,0,1,1,0,0]],
-          ['Fase 4 · Resto de plantas',      '#e24b4a','⚒',   [0,0,0,1,1,0]],
-          ['Fase 4 · Senseye + Rutinas',     '#a855f7','▌',    [0,0,0,0,1,1]],
-          ['Revisiones con Fernando Soca',   '#1760a8','REV',  [0,1,0,1,0,1]],
-        ].map(([lbl,c,t,cols])=>`<tr>
-          <td style="padding:5px 8px;border-bottom:0.5px solid var(--bd)">${lbl}</td>
-          ${cols.map(on=>on?`<td style="padding:3px 5px;border-bottom:0.5px solid var(--bd)"><div style="height:16px;border-radius:3px;background:${c};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff">${t}</div></td>`:`<td style="border-bottom:0.5px solid var(--bd)"></td>`).join('')}
-        </tr>`).join('')}
-      </tbody>
-    </table>`));
-  app.appendChild(gc);
+  const ganttRows=[
+    ['Fase 1 · Inventario',           '#4ade80',[1,0,0,0,0,0]],
+    ['Fase 2 · Diagnóstico SIOS',      '#4a9eff',[1,1,0,0,0,0]],
+    ['Fase 3 · Base de datos',         '#ef9f27',[0,1,1,0,0,0]],
+    ['Fase 4 · Compras urgentes',      '#a855f7',[0,1,1,0,0,0]],
+    ['Migraciones Pucusana',           '#e24b4a',[0,0,1,0,0,0]],
+    ['Migraciones Trujillo',           '#e24b4a',[0,0,1,1,0,0]],
+    ['Resto de plantas',               '#e24b4a',[0,0,0,1,1,0]],
+    ['Senseye + Rutinas permanentes',  '#a855f7',[0,0,0,0,1,1]],
+    ['Revisiones con Fernando Soca',   '#1760a8',[0,1,0,1,0,1]],
+  ].map(([l,c,cols])=>`<tr><td style="padding:5px 8px;border-bottom:0.5px solid var(--bd);font-size:11px">${l}</td>${cols.map(on=>on?`<td style="padding:3px 5px;border-bottom:0.5px solid var(--bd)"><div style="height:16px;border-radius:3px;background:${c};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff">▌</div></td>`:`<td style="border-bottom:0.5px solid var(--bd)"></td>`).join('')}</tr>`).join('');
 
-  app.appendChild(el('p','font-size:11px;color:var(--tx3);text-align:center;margin-top:1.5rem;padding-top:1rem;border-top:0.5px solid var(--bd)',
-    'Plan de Trabajo · ACL · Gestión Obsolescencia Electrónica · Julio 2026'));
+  app.innerHTML=`
+    <div style="background:linear-gradient(135deg,#0b1d3a,#163364);color:#fff;border-radius:12px;padding:28px 32px;margin-bottom:18px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#4a9eff;margin-bottom:8px">JEFATURA NACIONAL DE MANTENIMIENTO — ACL</div>
+      <div style="font-size:22px;font-weight:700;margin-bottom:6px">Plan de Trabajo — Gestión de Obsolescencia Electrónica</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.65)">Arca Continental Lindley · 6 plantas · Perú · Julio – Diciembre 2026</div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;font-size:11px">
+        <span style="color:rgba(255,255,255,.5)">Responsable: <strong style="color:#fff">Edwin Ampuero</strong></span>
+        <span style="color:rgba(255,255,255,.5)">Aprueba: <strong style="color:#fff">Fernando Soca</strong></span>
+        <span style="color:rgba(255,255,255,.5)">Actualizado: <strong style="color:#fff">21 julio 2026</strong></span>
+      </div>
+    </div>
 
-  calcProg();
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+      <button onclick="window.print()" style="background:var(--ac);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:500">🖨️ Imprimir / Guardar PDF</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:16px">
+      ${[['5,663','Total equipos','var(--tx)'],['1,670','Obsoletos','#854f0b'],['927','Discontinued','#a32d2d'],['418','Phaseout','#854f0b'],['916','Sin stock','#a32d2d'],['754','Con stock','#3b6d11']].map(([v,l,c])=>`
+      <div style="background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:${c};line-height:1;margin-bottom:3px">${v}</div>
+        <div style="font-size:10px;color:var(--tx2)">${l}</div>
+      </div>`).join('')}
+    </div>
+
+    <div style="background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:18px">
+      <div style="font-size:12px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between">
+        <span>Progreso general del plan</span>
+        <span id="wpgpct" style="color:var(--ac);font-weight:700">0%</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">
+        ${PHASES.map(ph=>`
+        <div onclick="(function(){const b=document.getElementById('wpb-${ph.id}');if(b){const op=b.style.display!=='none';b.style.display=op?'none':'block';}})()" style="border-radius:8px;padding:10px;text-align:center;cursor:pointer;background:${ph.bg};border:0.5px solid ${ph.tx}">
+          <div id="wppm-${ph.id}" style="font-size:18px;font-weight:700;color:${ph.tx};line-height:1;margin-bottom:2px">0%</div>
+          <div style="font-size:10px;font-weight:600;color:${ph.tx}">Fase ${ph.n}</div>
+          <div style="font-size:9px;color:${ph.tx};margin-top:2px;opacity:.75">${['Inventario','Diagnóstico','Base de datos','Plan de acción'][parseInt(ph.n)-1]}</div>
+        </div>`).join('')}
+      </div>
+      <div style="height:8px;background:var(--bd);border-radius:4px;overflow:hidden">
+        <div id="wpgbar" style="height:100%;width:0%;border-radius:4px;background:linear-gradient(90deg,#4ade80,#4a9eff);transition:width .5s"></div>
+      </div>
+    </div>
+
+    <p style="font-size:11px;color:var(--tx3);margin-bottom:14px">💡 Haz clic en cada ✓ para marcar como completado. El progreso se guarda en este navegador.</p>
+
+    ${phaseHTML}
+
+    <div style="background:var(--s1);border:0.5px solid var(--bd);border-radius:10px;padding:14px 16px;margin-top:8px">
+      <p style="font-size:13px;font-weight:600;margin-bottom:10px">📅 Cronograma — Julio a Diciembre 2026</p>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:11px">
+          <thead><tr>
+            <th style="padding:5px 8px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:left;min-width:200px">Actividad</th>
+            ${['Jul','Ago','Sep','Oct','Nov','Dic'].map(m=>`<th style="padding:5px 8px;border-bottom:0.5px solid var(--bd);background:var(--s2);text-align:center;min-width:65px">${m} 2026</th>`).join('')}
+          </tr></thead>
+          <tbody>${ganttRows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <p style="font-size:11px;color:var(--tx3);text-align:center;margin-top:1.5rem;padding-top:1rem;border-top:0.5px solid var(--bd)">
+      Plan de Trabajo · ACL · Gestión Obsolescencia Electrónica · Julio 2026
+    </p>`;
+
+  recalc();
 }
 
 
